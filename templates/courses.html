@@ -1,0 +1,143 @@
+<!-- templates/courses.html -->
+{% extends 'base.html' %}
+
+{% block title %}Kurslar - Media Kompetentlik{% endblock %}
+
+{% block content %}
+<!-- Page Header -->
+<section class="hero-section py-5">
+    <div class="container hero-content">
+        <div class="row">
+            <div class="col-lg-8 mx-auto text-center">
+                <h1 class="display-4 fw-bold mb-3">Kurslar</h1>
+                <p class="lead">
+                    Professional o'qituvchilar bilan zamonaviy bilimlarni egallang
+                </p>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Filters Section -->
+<section class="py-4 bg-light">
+    <div class="container">
+        <form method="GET" action="{% url 'courses' %}">
+            <div class="row g-3">
+                <div class="col-md-6">
+                    <input type="text" name="search" class="form-control" 
+                           placeholder="Kurs qidirish..." value="{{ request.GET.search }}">
+                </div>
+                <div class="col-md-4">
+                    <select name="category" class="form-select">
+                        <option value="">Barcha kategoriyalar</option>
+                        {% for category in categories %}
+                        <option value="{{ category.slug }}" 
+                                {% if request.GET.category == category.slug %}selected{% endif %}>
+                            {{ category.name }}
+                        </option>
+                        {% endfor %}
+                    </select>
+                </div>
+                <div class="col-md-2">
+                    <button type="submit" class="btn btn-primary w-100">
+                        <i class="bi bi-search"></i> Qidirish
+                    </button>
+                </div>
+            </div>
+        </form>
+    </div>
+</section>
+
+<!-- Courses Grid -->
+<section class="py-5">
+    <div class="container">
+        {% if request.GET.search or request.GET.category %}
+        <div class="mb-4">
+            <nav aria-label="breadcrumb">
+                <ol class="breadcrumb">
+                    <li class="breadcrumb-item"><a href="{% url 'courses' %}">Barcha kurslar</a></li>
+                    {% if request.GET.category %}
+                    <li class="breadcrumb-item active">{{ request.GET.category }}</li>
+                    {% endif %}
+                    {% if request.GET.search %}
+                    <li class="breadcrumb-item active">Qidiruv: "{{ request.GET.search }}"</li>
+                    {% endif %}
+                </ol>
+            </nav>
+        </div>
+        {% endif %}
+
+        <div class="row">
+            {% for course in courses %}
+            <div class="col-lg-4 col-md-6 mb-4" data-aos="fade-up" data-aos-delay="{{ forloop.counter0|add:50 }}">
+                <div class="card h-100">
+                    {% if course.image %}
+                    <img src="{{ course.image.url }}" class="card-img-top" alt="{{ course.title }}">
+                    {% else %}
+                    <img src="https://images.unsplash.com/photo-1516321318423-f06f85e504b3?w=400" 
+                         class="card-img-top" alt="{{ course.title }}">
+                    {% endif %}
+                    
+                    <div class="card-body d-flex flex-column">
+                        <div class="d-flex justify-content-between align-items-start mb-2">
+                            <span class="badge bg-primary">{{ course.category.name }}</span>
+                            {% if course.is_free %}
+                            <span class="badge bg-success">Bepul</span>
+                            {% else %}
+                            <span class="badge bg-warning text-dark">{{ course.price|floatformat:0 }} so'm</span>
+                            {% endif %}
+                        </div>
+                        
+                        <h5 class="card-title">{{ course.title }}</h5>
+                        <p class="card-text text-muted flex-grow-1">
+                            {{ course.description|striptags|truncatewords:20 }}
+                        </p>
+                        
+                        <div class="mb-3">
+                            <div class="d-flex justify-content-between text-muted small">
+                                <span><i class="bi bi-clock"></i> {{ course.duration }}</span>
+                                <span><i class="bi bi-bar-chart"></i> 
+                                    {% if course.level == 'beginner' %}Boshlang'ich
+                                    {% elif course.level == 'intermediate' %}O'rta
+                                    {% else %}Murakkab{% endif %}
+                                </span>
+                            </div>
+                        </div>
+                        
+                        {% if course.instructor %}
+                        <div class="d-flex align-items-center mb-3">
+                            {% if course.instructor.avatar %}
+                            <img src="{{ course.instructor.avatar.url }}" 
+                                 class="rounded-circle me-2" width="30" height="30" alt="{{ course.instructor.username }}">
+                            {% else %}
+                            <div class="rounded-circle bg-primary text-white d-flex align-items-center justify-content-center me-2" 
+                                 style="width: 30px; height: 30px;">
+                                {{ course.instructor.first_name.0 }}
+                            </div>
+                            {% endif %}
+                            <small class="text-muted">{{ course.instructor.get_full_name }}</small>
+                        </div>
+                        {% endif %}
+                        
+                        <a href="{% url 'course_detail' course.slug %}" class="btn btn-primary w-100 mt-auto">
+                            Batafsil <i class="bi bi-arrow-right"></i>
+                        </a>
+                    </div>
+                </div>
+            </div>
+            {% empty %}
+            <div class="col-12">
+                <div class="text-center py-5">
+                    <i class="bi bi-inbox text-muted" style="font-size: 4rem;"></i>
+                    <h3 class="mt-3">Kurslar topilmadi</h3>
+                    <p class="text-muted">Qidiruv kriteriyalarini o'zgartiring</p>
+                    <a href="{% url 'courses' %}" class="btn btn-primary mt-3">
+                        Barcha kurslarni ko'rish
+                    </a>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+</section>
+{% endblock %}

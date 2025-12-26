@@ -1,0 +1,212 @@
+<!-- templates/index.html -->
+{% extends 'base.html' %}
+
+{% block title %}Bosh sahifa - Media Kompetentlik{% endblock %}
+
+{% block content %}
+<!-- Hero Section -->
+<section class="hero-section">
+    <div class="container hero-content">
+        <div class="row align-items-center">
+            <div class="col-lg-6" data-aos="fade-right">
+                <h1 class="display-4 fw-bold mb-4">
+                    Raqamli Media Kompetentlik
+                </h1>
+                <p class="lead mb-4">
+                    Zamonaviy axborot texnologiyalari va media savodxonlik sohasida 
+                    professional bilimlar va ko'nikmalarni egallang.
+                </p>
+                <div class="d-flex gap-3">
+                    <a href="{% url 'courses' %}" class="btn btn-light btn-lg">
+                        <i class="bi bi-play-circle"></i> Kurslarni boshlash
+                    </a>
+                    <a href="{% url 'glossary' %}" class="btn btn-outline-light btn-lg">
+                        <i class="bi bi-book"></i> Glossary
+                    </a>
+                </div>
+            </div>
+            <div class="col-lg-6 mt-5 mt-lg-0" data-aos="fade-left">
+                <img src="https://images.unsplash.com/photo-1522202176988-66273c2fd55f?w=600" 
+                     alt="Learning" class="img-fluid rounded shadow-lg">
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Statistics Section -->
+<section class="py-5 bg-light">
+    <div class="container">
+        <div class="row text-center">
+            <div class="col-md-3 mb-4" data-aos="fade-up" data-aos-delay="0">
+                <div class="p-4">
+                    <i class="bi bi-people-fill text-primary" style="font-size: 3rem;"></i>
+                    <h3 class="mt-3 fw-bold">1000+</h3>
+                    <p class="text-muted">Talabalar</p>
+                </div>
+            </div>
+            <div class="col-md-3 mb-4" data-aos="fade-up" data-aos-delay="100">
+                <div class="p-4">
+                    <i class="bi bi-journals text-primary" style="font-size: 3rem;"></i>
+                    <h3 class="mt-3 fw-bold">50+</h3>
+                    <p class="text-muted">Kurslar</p>
+                </div>
+            </div>
+            <div class="col-md-3 mb-4" data-aos="fade-up" data-aos-delay="200">
+                <div class="p-4">
+                    <i class="bi bi-award-fill text-primary" style="font-size: 3rem;"></i>
+                    <h3 class="mt-3 fw-bold">500+</h3>
+                    <p class="text-muted">Sertifikatlar</p>
+                </div>
+            </div>
+            <div class="col-md-3 mb-4" data-aos="fade-up" data-aos-delay="300">
+                <div class="p-4">
+                    <i class="bi bi-star-fill text-primary" style="font-size: 3rem;"></i>
+                    <h3 class="mt-3 fw-bold">4.9</h3>
+                    <p class="text-muted">Reyting</p>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Featured Courses -->
+<section class="py-5">
+    <div class="container">
+        <div class="text-center mb-5" data-aos="fade-up">
+            <h2 class="section-title">Mashhur Kurslar</h2>
+            <p class="text-muted">Eng yaxshi va mashhur kurslarimiz bilan tanishing</p>
+        </div>
+        
+        <div class="row">
+            {% for course in courses %}
+            <div class="col-lg-4 col-md-6 mb-4" data-aos="fade-up" data-aos-delay="{{ forloop.counter0|add:100 }}">
+                <div class="card">
+                    {% if course.image %}
+                    <img src="{{ course.image.url }}" class="card-img-top" alt="{{ course.title }}">
+                    {% else %}
+                    <img src="https://images.unsplash.com/photo-1516321318423-f06f85e504b3?w=400" 
+                         class="card-img-top" alt="{{ course.title }}">
+                    {% endif %}
+                    <div class="card-body">
+                        <div class="d-flex justify-content-between align-items-start mb-2">
+                            <span class="badge bg-primary">{{ course.category.name }}</span>
+                            {% if course.is_free %}
+                            <span class="badge bg-success">Bepul</span>
+                            {% else %}
+                            <span class="badge bg-warning text-dark">{{ course.price }} so'm</span>
+                            {% endif %}
+                        </div>
+                        <h5 class="card-title">{{ course.title }}</h5>
+                        <p class="card-text text-muted">
+                            {{ course.description|striptags|truncatewords:15 }}
+                        </p>
+                        <div class="d-flex justify-content-between align-items-center mt-3">
+                            <small class="text-muted">
+                                <i class="bi bi-clock"></i> {{ course.duration }}
+                            </small>
+                            <small class="text-muted">
+                                <i class="bi bi-bar-chart"></i> {{ course.level }}
+                            </small>
+                        </div>
+                        <a href="{% url 'course_detail' course.slug %}" class="btn btn-primary w-100 mt-3">
+                            Batafsil <i class="bi bi-arrow-right"></i>
+                        </a>
+                    </div>
+                </div>
+            </div>
+            {% empty %}
+            <div class="col-12 text-center">
+                <p class="text-muted">Hozircha kurslar mavjud emas</p>
+            </div>
+            {% endfor %}
+        </div>
+        
+        {% if courses %}
+        <div class="text-center mt-4">
+            <a href="{% url 'courses' %}" class="btn btn-outline-primary btn-lg">
+                Barcha kurslarni ko'rish <i class="bi bi-arrow-right"></i>
+            </a>
+        </div>
+        {% endif %}
+    </div>
+</section>
+
+<!-- Features Section -->
+<section class="py-5 bg-light">
+    <div class="container">
+        <div class="text-center mb-5" data-aos="fade-up">
+            <h2 class="section-title">Nima uchun bizni tanlash kerak?</h2>
+            <p class="text-muted">Professional ta'lim va zamonaviy yondashuv</p>
+        </div>
+        
+        <div class="row">
+            <div class="col-md-4 mb-4" data-aos="fade-up" data-aos-delay="0">
+                <div class="card h-100 border-0 shadow-sm">
+                    <div class="card-body text-center p-4">
+                        <div class="mb-3">
+                            <i class="bi bi-laptop text-primary" style="font-size: 3rem;"></i>
+                        </div>
+                        <h5 class="card-title">Zamonaviy Texnologiyalar</h5>
+                        <p class="card-text text-muted">
+                            Eng so'nggi texnologiyalar va amaliy bilimlar bilan ta'minlaymiz
+                        </p>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="col-md-4 mb-4" data-aos="fade-up" data-aos-delay="100">
+                <div class="card h-100 border-0 shadow-sm">
+                    <div class="card-body text-center p-4">
+                        <div class="mb-3">
+                            <i class="bi bi-person-check text-primary" style="font-size: 3rem;"></i>
+                        </div>
+                        <h5 class="card-title">Professional O'qituvchilar</h5>
+                        <p class="card-text text-muted">
+                            Tajribali mutaxassislar tomonidan olib boriladigan darslar
+                        </p>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="col-md-4 mb-4" data-aos="fade-up" data-aos-delay="200">
+                <div class="card h-100 border-0 shadow-sm">
+                    <div class="card-body text-center p-4">
+                        <div class="mb-3">
+                            <i class="bi bi-patch-check text-primary" style="font-size: 3rem;"></i>
+                        </div>
+                        <h5 class="card-title">Sertifikat</h5>
+                        <p class="card-text text-muted">
+                            Kurslarni muvaffaqiyatli yakunlash uchun rasmiy sertifikat
+                        </p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- CTA Section -->
+<section class="py-5" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);">
+    <div class="container">
+        <div class="row align-items-center">
+            <div class="col-lg-8" data-aos="fade-right">
+                <h2 class="text-white mb-3">O'qishni bugun boshlang!</h2>
+                <p class="text-white-50">
+                    Bepul ro'yxatdan o'ting va barcha kurslarimizga kirish imkoniyatiga ega bo'ling
+                </p>
+            </div>
+            <div class="col-lg-4 text-lg-end mt-3 mt-lg-0" data-aos="fade-left">
+                {% if not user.is_authenticated %}
+                <a href="{% url 'register' %}" class="btn btn-light btn-lg">
+                    <i class="bi bi-person-plus"></i> Ro'yxatdan o'tish
+                </a>
+                {% else %}
+                <a href="{% url 'courses' %}" class="btn btn-light btn-lg">
+                    <i class="bi bi-journals"></i> Kurslarni ko'rish
+                </a>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</section>
+{% endblock %}

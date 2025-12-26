@@ -1,0 +1,115 @@
+{% extends 'base.html' %}
+
+{% block title %}Profil - Media Kompetentlik{% endblock %}
+
+{% block content %}
+<!-- Profile Header -->
+<section class="py-5 bg-light">
+    <div class="container">
+        <div class="row">
+            <div class="col-lg-3 text-center">
+                {% if user.avatar %}
+                <img src="{{ user.avatar.url }}" class="rounded-circle mb-3" 
+                     width="150" height="150" alt="{{ user.username }}">
+                {% else %}
+                <div class="rounded-circle bg-primary text-white d-flex align-items-center justify-content-center mx-auto mb-3" 
+                     style="width: 150px; height: 150px; font-size: 4rem;">
+                    {{ user.first_name.0 }}{{ user.last_name.0 }}
+                </div>
+                {% endif %}
+                <h3>{{ user.get_full_name }}</h3>
+                <p class="text-muted">@{{ user.username }}</p>
+            </div>
+            
+            <div class="col-lg-9">
+                <div class="card">
+                    <div class="card-body">
+                        <h5 class="card-title mb-4">Shaxsiy ma'lumotlar</h5>
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <strong>Email:</strong><br>
+                                {{ user.email }}
+                            </div>
+                            {% if user.phone %}
+                            <div class="col-md-6 mb-3">
+                                <strong>Telefon:</strong><br>
+                                {{ user.phone }}
+                            </div>
+                            {% endif %}
+                            <div class="col-md-6 mb-3">
+                                <strong>Ro'yxatdan o'tgan:</strong><br>
+                                {{ user.created_at|date:"d.m.Y" }}
+                            </div>
+                        </div>
+                        {% if user.bio %}
+                        <div class="mt-3">
+                            <strong>Bio:</strong><br>
+                            <p class="text-muted">{{ user.bio }}</p>
+                        </div>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- User Courses -->
+<section class="py-5">
+    <div class="container">
+        <h3 class="mb-4">Mening kurslarim</h3>
+        
+        <div class="row">
+            {% for enrollment in enrollments %}
+            <div class="col-lg-4 col-md-6 mb-4">
+                <div class="card h-100">
+                    {% if enrollment.course.image %}
+                    <img src="{{ enrollment.course.image.url }}" class="card-img-top" 
+                         alt="{{ enrollment.course.title }}">
+                    {% endif %}
+                    <div class="card-body">
+                        <h5 class="card-title">{{ enrollment.course.title }}</h5>
+                        
+                        <!-- Progress Bar -->
+                        <div class="mb-3">
+                            <div class="d-flex justify-content-between mb-1">
+                                <small class="text-muted">Jarayon</small>
+                                <small class="text-muted">{{ enrollment.progress }}%</small>
+                            </div>
+                            <div class="progress">
+                                <div class="progress-bar" role="progressbar" 
+                                     style="width: {{ enrollment.progress }}%"
+                                     aria-valuenow="{{ enrollment.progress }}" 
+                                     aria-valuemin="0" aria-valuemax="100"></div>
+                            </div>
+                        </div>
+                        
+                        {% if enrollment.completed %}
+                        <span class="badge bg-success mb-3">
+                            <i class="bi bi-check-circle"></i> Tugallangan
+                        </span>
+                        {% endif %}
+                        
+                        <a href="{% url 'course_detail' enrollment.course.slug %}" 
+                           class="btn btn-primary w-100">
+                            Davom ettirish <i class="bi bi-arrow-right"></i>
+                        </a>
+                    </div>
+                </div>
+            </div>
+            {% empty %}
+            <div class="col-12">
+                <div class="text-center py-5">
+                    <i class="bi bi-inbox text-muted" style="font-size: 4rem;"></i>
+                    <h4 class="mt-3">Kurslar mavjud emas</h4>
+                    <p class="text-muted">Hali birorta kursga yozilmagansiz</p>
+                    <a href="{% url 'courses' %}" class="btn btn-primary mt-3">
+                        Kurslarni ko'rish
+                    </a>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+</section>
+{% endblock %}

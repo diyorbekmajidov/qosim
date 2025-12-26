@@ -1,0 +1,130 @@
+<!-- templates/contact.html -->
+{% extends 'base.html' %}
+
+{% block title %}Aloqa - Media Kompetentlik{% endblock %}
+
+{% block content %}
+<!-- Page Header -->
+<section class="hero-section py-5">
+    <div class="container hero-content">
+        <div class="row">
+            <div class="col-lg-8 mx-auto text-center">
+                <h1 class="display-4 fw-bold mb-3">Biz bilan bog'laning</h1>
+                <p class="lead">
+                    Savollaringiz bormi? Biz sizga yordam berishga tayyormiz!
+                </p>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Contact Section -->
+<section class="py-5">
+    <div class="container">
+        <div class="row">
+            <div class="col-lg-8 mx-auto">
+                <div class="card border-0 shadow-lg">
+                    <div class="card-body p-5">
+                        <form method="POST" action="{% url 'contact' %}">
+                            {% csrf_token %}
+                            <div class="row">
+                                <div class="col-md-6 mb-4">
+                                    <label for="firstName" class="form-label">Ism *</label>
+                                    <input type="text" class="form-control" id="firstName" 
+                                           name="first_name" required>
+                                </div>
+                                <div class="col-md-6 mb-4">
+                                    <label for="lastName" class="form-label">Familiya *</label>
+                                    <input type="text" class="form-control" id="lastName" 
+                                           name="last_name" required>
+                                </div>
+                            </div>
+                            
+                            <div class="row">
+                                <div class="col-md-6 mb-4">
+                                    <label for="email" class="form-label">Email *</label>
+                                    <input type="email" class="form-control" id="email" 
+                                           name="email" required>
+                                </div>
+                                <div class="col-md-6 mb-4">
+                                    <label for="phone" class="form-label">Telefon</label>
+                                    <input type="tel" class="form-control" id="phone" 
+                                           name="phone" placeholder="+998 90 123 45 67">
+                                </div>
+                            </div>
+                            
+                            <div class="mb-4">
+                                <label for="subject" class="form-label">Mavzu *</label>
+                                <input type="text" class="form-control" id="subject" 
+                                       name="subject" required>
+                            </div>
+                            
+                            <div class="mb-4">
+                                <label for="message" class="form-label">Xabar *</label>
+                                <textarea class="form-control" id="message" name="message" 
+                                          rows="6" required></textarea>
+                            </div>
+                            
+                            <button type="submit" class="btn btn-primary btn-lg w-100">
+                                <i class="bi bi-send"></i> Xabar yuborish
+                            </button>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Contact Info -->
+<section class="py-5 bg-light">
+    <div class="container">
+        <div class="row">
+            <div class="col-md-4 mb-4" data-aos="fade-up" data-aos-delay="0">
+                <div class="card h-100 border-0 shadow-sm text-center">
+                    <div class="card-body p-4">
+                        <div class="mb-3">
+                            <i class="bi bi-geo-alt-fill text-primary" style="font-size: 3rem;"></i>
+                        </div>
+                        <h5 class="card-title">Manzil</h5>
+                        <p class="card-text text-muted">
+                            Toshkent shahri, Yunusobod tumani<br>
+                            Amir Temur ko'chasi, 129
+                        </p>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="col-md-4 mb-4" data-aos="fade-up" data-aos-delay="100">
+                <div class="card h-100 border-0 shadow-sm text-center">
+                    <div class="card-body p-4">
+                        <div class="mb-3">
+                            <i class="bi bi-envelope-fill text-primary" style="font-size: 3rem;"></i>
+                        </div>
+                        <h5 class="card-title">Email</h5>
+                        <p class="card-text text-muted">
+                            info@mediacomp.uz<br>
+                            support@mediacomp.uz
+                        </p>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="col-md-4 mb-4" data-aos="fade-up" data-aos-delay="200">
+                <div class="card h-100 border-0 shadow-sm text-center">
+                    <div class="card-body p-4">
+                        <div class="mb-3">
+                            <i class="bi bi-telephone-fill text-primary" style="font-size: 3rem;"></i>
+                        </div>
+                        <h5 class="card-title">Telefon</h5>
+                        <p class="card-text text-muted">
+                            +998 90 123 45 67<br>
+                            +998 71 123 45 67
+                        </p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+{% endblock %}

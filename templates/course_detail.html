@@ -1,0 +1,195 @@
+<!-- templates/course_detail.html -->
+{% extends 'base.html' %}
+
+{% block title %}{{ course.title }} - Media Kompetentlik{% endblock %}
+
+{% block content %}
+<!-- Course Header -->
+<section class="py-5" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);">
+    <div class="container">
+        <div class="row align-items-center">
+            <div class="col-lg-8 text-white">
+                <nav aria-label="breadcrumb">
+                    <ol class="breadcrumb">
+                        <li class="breadcrumb-item"><a href="{% url 'index' %}" class="text-white">Bosh sahifa</a></li>
+                        <li class="breadcrumb-item"><a href="{% url 'courses' %}" class="text-white">Kurslar</a></li>
+                        <li class="breadcrumb-item active text-white">{{ course.title }}</li>
+                    </ol>
+                </nav>
+                
+                <span class="badge bg-light text-primary mb-3">{{ course.category.name }}</span>
+                <h1 class="display-5 fw-bold mb-3">{{ course.title }}</h1>
+                <p class="lead mb-4">{{ course.description|striptags|truncatewords:30 }}</p>
+                
+                <div class="d-flex flex-wrap gap-3 mb-4">
+                    <div>
+                        <i class="bi bi-clock"></i> {{ course.duration }}
+                    </div>
+                    <div>
+                        <i class="bi bi-bar-chart"></i> 
+                        {% if course.level == 'beginner' %}Boshlang'ich
+                        {% elif course.level == 'intermediate' %}O'rta
+                        {% else %}Murakkab{% endif %}
+                    </div>
+                    <div>
+                        <i class="bi bi-people"></i> {{ course.enrollments.count }} talaba
+                    </div>
+                </div>
+                
+                {% if course.instructor %}
+                <div class="d-flex align-items-center">
+                    {% if course.instructor.avatar %}
+                    <img src="{{ course.instructor.avatar.url }}" 
+                         class="rounded-circle me-3" width="50" height="50" alt="{{ course.instructor.username }}">
+                    {% else %}
+                    <div class="rounded-circle bg-white text-primary d-flex align-items-center justify-content-center me-3" 
+                         style="width: 50px; height: 50px; font-size: 1.5rem;">
+                        {{ course.instructor.first_name.0 }}
+                    </div>
+                    {% endif %}
+                    <div>
+                        <div class="fw-bold">{{ course.instructor.get_full_name }}</div>
+                        <small class="text-white-50">Instruktor</small>
+                    </div>
+                </div>
+                {% endif %}
+            </div>
+            
+            <div class="col-lg-4 mt-4 mt-lg-0">
+                <div class="card shadow-lg">
+                    {% if course.image %}
+                    <img src="{{ course.image.url }}" class="card-img-top" alt="{{ course.title }}">
+                    {% else %}
+                    <img src="https://images.unsplash.com/photo-1516321318423-f06f85e504b3?w=400" 
+                         class="card-img-top" alt="{{ course.title }}">
+                    {% endif %}
+                    <div class="card-body text-center">
+                        {% if course.is_free %}
+                        <h3 class="text-success mb-3">Bepul</h3>
+                        {% else %}
+                        <h3 class="text-primary mb-3">{{ course.price|floatformat:0 }} so'm</h3>
+                        {% endif %}
+                        
+                        {% if user.is_authenticated %}
+                        <button class="btn btn-primary w-100 btn-lg mb-2">
+                            <i class="bi bi-play-circle"></i> Kursni boshlash
+                        </button>
+                        {% else %}
+                        <a href="{% url 'login' %}" class="btn btn-primary w-100 btn-lg mb-2">
+                            <i class="bi bi-box-arrow-in-right"></i> Kirish
+                        </a>
+                        {% endif %}
+                        
+                        <p class="text-muted small mb-0">
+                            <i class="bi bi-shield-check"></i> 30 kunlik pul qaytarish kafolati
+                        </p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Course Content -->
+<section class="py-5">
+    <div class="container">
+        <div class="row">
+            <div class="col-lg-8">
+                <!-- Course Description -->
+                <div class="card mb-4">
+                    <div class="card-body">
+                        <h3 class="mb-4">Kurs haqida</h3>
+                        <div class="course-description">
+                            {{ course.description|safe }}
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Lessons -->
+                <div class="card">
+                    <div class="card-header bg-white">
+                        <h3 class="mb-0">
+                            <i class="bi bi-list-ul"></i> Darslar 
+                            <span class="badge bg-primary">{{ lessons.count }}</span>
+                        </h3>
+                    </div>
+                    <div class="list-group list-group-flush">
+                        {% for lesson in lessons %}
+                        <div class="list-group-item">
+                            <div class="d-flex justify-content-between align-items-center">
+                                <div>
+                                    <h6 class="mb-1">
+                                        <span class="text-muted me-2">{{ forloop.counter }}.</span>
+                                        {{ lesson.title }}
+                                    </h6>
+                                    {% if lesson.duration %}
+                                    <small class="text-muted">
+                                        <i class="bi bi-clock"></i> {{ lesson.duration }}
+                                    </small>
+                                    {% endif %}
+                                </div>
+                                <div>
+                                    {% if lesson.is_free %}
+                                    <span class="badge bg-success">Bepul</span>
+                                    {% else %}
+                                    <i class="bi bi-lock text-muted"></i>
+                                    {% endif %}
+                                </div>
+                            </div>
+                        </div>
+                        {% empty %}
+                        <div class="list-group-item text-center py-4">
+                            <p class="text-muted mb-0">Darslar hozircha qo'shilmagan</p>
+                        </div>
+                        {% endfor %}
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Sidebar -->
+            <div class="col-lg-4">
+                <!-- Course Features -->
+                <div class="card mb-4">
+                    <div class="card-header bg-white">
+                        <h5 class="mb-0">Kurs imkoniyatlari</h5>
+                    </div>
+                    <div class="card-body">
+                        <ul class="list-unstyled mb-0">
+                            <li class="mb-3">
+                                <i class="bi bi-check-circle-fill text-success me-2"></i>
+                                Umrbod kirish
+                            </li>
+                            <li class="mb-3">
+                                <i class="bi bi-check-circle-fill text-success me-2"></i>
+                                Mobil va kompyuterdan kirish
+                            </li>
+                            <li class="mb-3">
+                                <i class="bi bi-check-circle-fill text-success me-2"></i>
+                                Sertifikat
+                            </li>
+                            <li class="mb-3">
+                                <i class="bi bi-check-circle-fill text-success me-2"></i>
+                                Doimiy yangilanishlar
+                            </li>
+                            <li class="mb-0">
+                                <i class="bi bi-check-circle-fill text-success me-2"></i>
+                                Online yordam
+                            </li>
+                        </ul>
+                    </div>
+                </div>
+                
+                <!-- Related Courses -->
+                <div class="card">
+                    <div class="card-header bg-white">
+                        <h5 class="mb-0">O'xshash kurslar</h5>
+                    </div>
+                    <div class="card-body">
+                        <p class="text-muted small">Tez orada...</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+{% endblock %}

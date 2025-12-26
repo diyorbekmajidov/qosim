@@ -1,0 +1,86 @@
+<!DOCTYPE html>
+<html lang="uz">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Kirish - Media Kompetentlik</title>
+    
+    <link href="assets/css/bootstrap.min.css" rel="stylesheet">
+    <link href="assets/css/auth.css" rel="stylesheet">
+</head>
+<body class="auth-body">
+    <div class="container">
+        <div class="row justify-content-center align-items-center min-vh-100">
+            <div class="col-md-5">
+                <div class="auth-card">
+                    <!-- Logo -->
+                    <div class="text-center mb-4">
+                        <h2 class="auth-title">Tizimga Kirish</h2>
+                        <p class="text-muted">Media Kompetentlik platformasiga xush kelibsiz</p>
+                    </div>
+                    
+                    <!-- Alert -->
+                    <div id="alertBox" class="alert alert-dismissible fade" role="alert" style="display: none;">
+                        <span id="alertMessage"></span>
+                        <button type="button" class="btn-close" onclick="hideAlert()"></button>
+                    </div>
+                    
+                    <!-- Login Form -->
+                    <form id="loginForm">
+                        <div class="mb-3">
+                            <label for="username" class="form-label">
+                                <i class="bi bi-person"></i> Foydalanuvchi nomi
+                            </label>
+                            <input type="text" class="form-control" id="username" 
+                                   placeholder="Username" required>
+                        </div>
+                        
+                        <div class="mb-3">
+                            <label for="password" class="form-label">
+                                <i class="bi bi-lock"></i> Parol
+                            </label>
+                            <input type="password" class="form-control" id="password" 
+                                   placeholder="••••••••" required>
+                        </div>
+                        
+                        <div class="mb-3 form-check">
+                            <input type="checkbox" class="form-check-input" id="rememberMe">
+                            <label class="form-check-label" for="rememberMe">
+                                Meni eslab qol
+                            </label>
+                        </div>
+                        
+                        <button type="submit" class="btn btn-primary w-100 btn-lg" id="loginBtn">
+                            <span id="loginBtnText">Kirish</span>
+                            <span id="loginSpinner" class="spinner-border spinner-border-sm" 
+                                  style="display: none;"></span>
+                        </button>
+                    </form>
+                    
+                    <hr class="my-4">
+                    
+                    <!-- Register Link -->
+                    <div class="text-center">
+                        <p class="mb-0">
+                            Akkauntingiz yo'qmi? 
+                            <a href="register.html" class="text-decoration-none fw-bold">
+                                Ro'yxatdan o'tish
+                            </a>
+                        </p>
+                    </div>
+                    
+                    <!-- Back to Home -->
+                    <div class="text-center mt-3">
+                        <a href="index.html" class="text-muted text-decoration-none">
+                            <i class="bi bi-arrow-left"></i> Bosh sahifaga qaytish
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="assets/js/bootstrap.bundle.min.js"></script>
+    <script src="assets/js/auth.js"></script>
+</body>
+</html>

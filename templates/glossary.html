@@ -1,0 +1,156 @@
+<!-- templates/glossary.html -->
+{% extends 'base.html' %}
+
+{% block title %}Glossary - Media Kompetentlik{% endblock %}
+
+{% block content %}
+<!-- Page Header -->
+<section class="hero-section py-5">
+    <div class="container hero-content">
+        <div class="row">
+            <div class="col-lg-8 mx-auto text-center">
+                <h1 class="display-4 fw-bold mb-3">GLOSSARY</h1>
+                <p class="lead">
+                    Media va axborot texnologiyalari sohasidagi asosiy atamalar lug'ati
+                </p>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Search Section -->
+<section class="py-4 bg-light">
+    <div class="container">
+        <div class="row justify-content-center">
+            <div class="col-md-6">
+                <div class="input-group input-group-lg">
+                    <span class="input-group-text bg-white">
+                        <i class="bi bi-search"></i>
+                    </span>
+                    <input type="text" class="form-control" id="searchInput" 
+                           placeholder="Atama qidirish...">
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Terms Section -->
+<section class="py-5">
+    <div class="container">
+        <div class="row">
+            <div class="col-12">
+                <!-- Alphabet Filter -->
+                <div class="mb-4 d-flex flex-wrap gap-2">
+                    <button class="btn btn-sm btn-outline-primary active" data-letter="all">Hammasi</button>
+                    {% for letter in 'ABCDEFGHIJKLMNOPQRSTUVWXYZ' %}
+                    <button class="btn btn-sm btn-outline-primary" data-letter="{{ letter }}">{{ letter }}</button>
+                    {% endfor %}
+                </div>
+                
+                <!-- Terms Table -->
+                <div class="card border-0 shadow-sm">
+                    <div class="card-body p-0">
+                        <div class="table-responsive">
+                            <table class="table table-hover mb-0" id="termsTable">
+                                <thead class="table-light">
+                                    <tr>
+                                        <th style="width: 25%;" class="p-3">Atama</th>
+                                        <th class="p-3">Ta'rif</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="termsTableBody">
+                                    {% for term in terms %}
+                                    <tr data-aos="fade-up" data-aos-delay="{{ forloop.counter0|add:50 }}">
+                                        <td class="p-3">
+                                            <strong class="text-primary">{{ term.title }}</strong>
+                                        </td>
+                                        <td class="p-3">
+                                            {{ term.description|safe }}
+                                        </td>
+                                    </tr>
+                                    {% empty %}
+                                    <tr>
+                                        <td colspan="2" class="text-center p-5">
+                                            <i class="bi bi-inbox text-muted" style="font-size: 3rem;"></i>
+                                            <p class="text-muted mt-3">Hozircha atamalar mavjud emas</p>
+                                        </td>
+                                    </tr>
+                                    {% endfor %}
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- No Results Message -->
+                <div id="noResults" class="text-center py-5" style="display: none;">
+                    <i class="bi bi-search text-muted" style="font-size: 3rem;"></i>
+                    <p class="text-muted mt-3">Qidiruv bo'yicha natija topilmadi</p>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    // Search functionality
+    const searchInput = document.getElementById('searchInput');
+    const termsTableBody = document.getElementById('termsTableBody');
+    const noResults = document.getElementById('noResults');
+    const allRows = Array.from(termsTableBody.querySelectorAll('tr'));
+
+    searchInput.addEventListener('input', function(e) {
+        const searchTerm = e.target.value.toLowerCase();
+        let visibleCount = 0;
+
+        allRows.forEach(row => {
+            const title = row.querySelector('strong')?.textContent.toLowerCase() || '';
+            const description = row.cells[1]?.textContent.toLowerCase() || '';
+            
+            if (title.includes(searchTerm) || description.includes(searchTerm)) {
+                row.style.display = '';
+                visibleCount++;
+            } else {
+                row.style.display = 'none';
+            }
+        });
+
+        if (visibleCount === 0) {
+            noResults.style.display = 'block';
+        } else {
+            noResults.style.display = 'none';
+        }
+    });
+
+    // Alphabet filter
+    document.querySelectorAll('[data-letter]').forEach(btn => {
+        btn.addEventListener('click', function() {
+            document.querySelectorAll('[data-letter]').forEach(b => b.classList.remove('active'));
+            this.classList.add('active');
+            
+            const letter = this.dataset.letter;
+            let visibleCount = 0;
+
+            allRows.forEach(row => {
+                const title = row.querySelector('strong')?.textContent || '';
+                
+                if (letter === 'all' || title.toUpperCase().startsWith(letter)) {
+                    row.style.display = '';
+                    visibleCount++;
+                } else {
+                    row.style.display = 'none';
+                }
+            });
+
+            if (visibleCount === 0) {
+                noResults.style.display = 'block';
+            } else {
+                noResults.style.display = 'none';
+            }
+        });
+    });
+</script>
+{% endblock %}
