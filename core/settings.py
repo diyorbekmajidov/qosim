@@ -122,7 +122,7 @@ REST_FRAMEWORK = {
 CORS_ALLOWED_ORIGINS = [
     "http://localhost:3000",
     "http://127.0.0.1:8000",
-    "https://interactive.uzfi.uz/"
+    "https://interactive.uzfi.uz"
 ]
 CORS_ALLOW_ALL_ORIGINS = True
 
