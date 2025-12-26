@@ -95,6 +95,7 @@ USE_TZ = True
 # Static files
 STATIC_URL = '/static/'
 
+
 STATICFILES_DIRS = [os.path.join(BASE_DIR, 'static')] 
 STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')
 
@@ -122,7 +123,7 @@ REST_FRAMEWORK = {
 CORS_ALLOWED_ORIGINS = [
     "http://localhost:3000",
     "http://127.0.0.1:8000",
-    "https://interactive.uzfi.uz"
+    "https://interactive.uzfi.uz/"
 ]
 CORS_ALLOW_ALL_ORIGINS = True
 
