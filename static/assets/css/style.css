@@ -1,0 +1,62 @@
+/* Global Styles */
+body {
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+}
+
+/* Navbar */
+.navbar-brand {
+    font-weight: bold;
+    font-size: 1.5rem;
+}
+
+/* Hero Section */
+.hero-section {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: white;
+}
+
+.hero-section h1 {
+    font-weight: bold;
+    color: white;
+}
+
+/* Search Input */
+#searchInput {
+    border-radius: 50px;
+    padding: 12px 25px;
+    border: 2px solid #667eea;
+    font-size: 1rem;
+}
+
+#searchInput:focus {
+    box-shadow: 0 0 0 0.2rem rgba(102, 126, 234, 0.25);
+    border-color: #667eea;
+}
+
+/* Table Styles */
+.table-hover tbody tr:hover {
+    background-color: #f0f0f0;
+    cursor: pointer;
+}
+
+.table th {
+    background-color: #667eea;
+    color: white;
+    font-weight: 600;
+}
+
+/* Footer */
+footer {
+    margin-top: auto;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+    .hero-section h1 {
+        font-size: 1.8rem;
+    }
+    
+    .table {
+        font-size: 0.9rem;
+    }
+}
