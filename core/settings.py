@@ -5,7 +5,7 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 
 SECRET_KEY = 'django-insecure-6%6@=z@2jgui%^m3%f2m!brvi#*s4^3@vr&yrz@q#n7*ylvabu'
 
-DEBUG = True
+DEBUG = False
 
 ALLOWED_HOSTS = ['*']
 
@@ -27,6 +27,13 @@ INSTALLED_APPS = [
     
     # Local apps
     'courses',
+]
+
+CSRF_TRUSTED_ORIGINS = [
+    'https://interactive.uzfi.uz',
+    'http://interactive.uzfi.uz',
+    'http://localhost:3000',
+    'http://127.0.0.1:8000',
 ]
 
 MIDDLEWARE = [
@@ -123,9 +130,10 @@ REST_FRAMEWORK = {
 CORS_ALLOWED_ORIGINS = [
     "http://localhost:3000",
     "http://127.0.0.1:8000",
-    # "https://interactive.uzfi.uz/"
+    "https://interactive.uzfi.uz",
+    "http://interactive.uzfi.uz",
 ]
-CORS_ALLOW_ALL_ORIGINS = True
+CORS_ALLOW_ALL_ORIGINS = False
 
 # CKEditor Settings
 CKEDITOR_UPLOAD_PATH = "uploads/"
