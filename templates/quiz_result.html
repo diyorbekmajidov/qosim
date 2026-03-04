@@ -1,0 +1,265 @@
+<!-- templates/quiz_result.html -->
+{% extends 'base.html' %}
+{% block title %}Test Natijasi - {{ lesson.title }}{% endblock %}
+
+{% block content %}
+<section class="py-5">
+    <div class="container">
+        <div class="row justify-content-center">
+            <div class="col-lg-7">
+                <!-- Result Header -->
+                <div class="result-card card mb-4 {% if passed %}passed{% else %}failed{% endif %}">
+                    <div class="result-header text-center py-5">
+                        {% if passed %}
+                        <div class="result-icon mb-3">
+                            <i class="bi bi-trophy-fill"></i>
+                        </div>
+                        <h2 class="fw-bold text-white mb-1">Tabriklaymiz!</h2>
+                        <p class="text-white-75 mb-0">Siz testdan muvaffaqiyatli o'tdingiz</p>
+                        {% else %}
+                        <div class="result-icon mb-3">
+                            <i class="bi bi-x-circle-fill"></i>
+                        </div>
+                        <h2 class="fw-bold text-white mb-1">Harakat qiling</h2>
+                        <p class="text-white-75 mb-0">O'tish balli: {{ quiz.pass_score }}%</p>
+                        {% endif %}
+
+                        <!-- Score Circle -->
+                        <div class="score-circle mx-auto mt-4">
+                            <svg viewBox="0 0 120 120">
+                                <circle cx="60" cy="60" r="52" fill="none" stroke="rgba(255,255,255,0.2)"
+                                    stroke-width="8" />
+                                <circle cx="60" cy="60" r="52" fill="none" stroke="white" stroke-width="8"
+                                    stroke-dasharray="{{ score|floatformat:0 }} 327" stroke-dashoffset="82"
+                                    stroke-linecap="round" transform="rotate(-90 60 60)" />
+                            </svg>
+                            <div class="score-text">
+                                <span class="score-number">{{ score }}</span>
+                                <span class="score-pct">%</span>
+                            </div>
+                        </div>
+
+                        <div class="d-flex justify-content-center gap-4 mt-4">
+                            <div class="stat-item text-white">
+                                <div class="stat-num">{{ correct }}</div>
+                                <div class="stat-lbl">To'g'ri</div>
+                            </div>
+                            <div class="stat-divider"></div>
+                            <div class="stat-item text-white">
+                                <div class="stat-num">{{ total|add:"-0"|add:correct|add:"-0" }}</div>
+                                <div class="stat-lbl">Noto'g'ri</div>
+                            </div>
+                            <div class="stat-divider"></div>
+                            <div class="stat-item text-white">
+                                <div class="stat-num">{{ total }}</div>
+                                <div class="stat-lbl">Jami</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Detailed Results -->
+                <div class="card mb-4">
+                    <div class="card-header bg-white">
+                        <h5 class="mb-0">
+                            <i class="bi bi-list-check me-2 text-primary"></i>Savollar tahlili
+                        </h5>
+                    </div>
+                    <div class="card-body p-0">
+                        {% for result in results %}
+                        <div class="result-item {% if result.is_correct %}correct{% else %}incorrect{% endif %}">
+                            <div class="result-item-header">
+                                <span class="result-icon-sm">
+                                    {% if result.is_correct %}
+                                    <i class="bi bi-check-circle-fill text-success"></i>
+                                    {% else %}
+                                    <i class="bi bi-x-circle-fill text-danger"></i>
+                                    {% endif %}
+                                </span>
+                                <p class="result-question">
+                                    {{ forloop.counter }}. {{ result.question.question }}
+                                </p>
+                            </div>
+
+                            {% if result.user_answer %}
+                            <div class="result-answer">
+                                <small class="text-muted d-block mb-1">Sizning javobingiz:</small>
+                                <span
+                                    class="answer-chip {% if result.is_correct %}chip-correct{% else %}chip-wrong{% endif %}">
+                                    {{ result.user_answer.text }}
+                                </span>
+                            </div>
+                            {% endif %}
+
+                            {% if not result.is_correct and result.correct_answer %}
+                            <div class="result-answer mt-2">
+                                <small class="text-muted d-block mb-1">To'g'ri javob:</small>
+                                <span class="answer-chip chip-correct">{{ result.correct_answer.text }}</span>
+                            </div>
+                            {% endif %}
+                        </div>
+                        {% endfor %}
+                    </div>
+                </div>
+
+                <!-- Actions -->
+                <div class="d-flex gap-3 flex-wrap">
+                    <a href="{% url 'lesson' lesson.pk %}" class="btn btn-outline-primary flex-fill">
+                        <i class="bi bi-arrow-repeat me-1"></i>
+                        {% if passed %}Darsa qaytish{% else %}Qayta urinish{% endif %}
+                    </a>
+                    {% if passed and next_lesson %}
+                    <a href="{% url 'lesson' next_lesson.pk %}" class="btn btn-primary flex-fill">
+                        Keyingi dars <i class="bi bi-arrow-right ms-1"></i>
+                    </a>
+                    {% elif passed %}
+                    <a href="{% url 'course_detail' lesson.course.slug %}" class="btn btn-success flex-fill">
+                        <i class="bi bi-trophy-fill me-1"></i>Kurs tugadi!
+                    </a>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+{% endblock %}
+
+{% block extra_css %}
+<style>
+    .result-card {
+        border: none;
+        border-radius: 20px;
+        overflow: hidden;
+        box-shadow: 0 8px 40px rgba(0, 0, 0, 0.15);
+    }
+
+    .result-card.passed .result-header {
+        background: linear-gradient(135deg, #11998e 0%, #38ef7d 100%);
+    }
+
+    .result-card.failed .result-header {
+        background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+    }
+
+    .result-header {
+        padding: 40px 30px;
+    }
+
+    .result-icon {
+        font-size: 3.5rem;
+        color: rgba(255, 255, 255, 0.9);
+    }
+
+    .text-white-75 {
+        color: rgba(255, 255, 255, 0.8) !important;
+    }
+
+    .score-circle {
+        position: relative;
+        width: 130px;
+        height: 130px;
+    }
+
+    .score-circle svg {
+        width: 100%;
+        height: 100%;
+    }
+
+    .score-text {
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+        text-align: center;
+        color: white;
+    }
+
+    .score-number {
+        font-size: 2.2rem;
+        font-weight: 800;
+        line-height: 1;
+    }
+
+    .score-pct {
+        font-size: 1rem;
+        font-weight: 600;
+    }
+
+    .stat-item {
+        text-align: center;
+    }
+
+    .stat-num {
+        font-size: 1.8rem;
+        font-weight: 800;
+        line-height: 1;
+    }
+
+    .stat-lbl {
+        font-size: 0.8rem;
+        opacity: 0.75;
+    }
+
+    .stat-divider {
+        width: 1px;
+        background: rgba(255, 255, 255, 0.25);
+        align-self: stretch;
+    }
+
+    .result-item {
+        padding: 16px 20px;
+        border-bottom: 1px solid #f0f0f0;
+    }
+
+    .result-item:last-child {
+        border-bottom: none;
+    }
+
+    .result-item.correct {
+        border-left: 3px solid #2ecc71;
+    }
+
+    .result-item.incorrect {
+        border-left: 3px solid #e74c3c;
+    }
+
+    .result-item-header {
+        display: flex;
+        align-items: flex-start;
+        gap: 10px;
+    }
+
+    .result-icon-sm {
+        font-size: 1.1rem;
+        margin-top: 2px;
+        flex-shrink: 0;
+    }
+
+    .result-question {
+        margin: 0;
+        font-weight: 500;
+    }
+
+    .result-answer {
+        padding-left: 30px;
+    }
+
+    .answer-chip {
+        display: inline-block;
+        padding: 5px 14px;
+        border-radius: 20px;
+        font-size: 0.875rem;
+        font-weight: 500;
+    }
+
+    .chip-correct {
+        background: #d4edda;
+        color: #155724;
+    }
+
+    .chip-wrong {
+        background: #f8d7da;
+        color: #721c24;
+    }
+</style>
+{% endblock %}

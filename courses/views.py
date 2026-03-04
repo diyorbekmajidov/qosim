@@ -5,6 +5,8 @@ from django.contrib.auth import authenticate, login, logout
 from django.contrib.auth.decorators import login_required
 from django.contrib import messages
 from django.db.models import Q
+from django.utils import timezone
+from django.http import JsonResponse
 
 from rest_framework import viewsets, status
 from rest_framework.decorators import api_view, permission_classes, action
@@ -12,11 +14,14 @@ from rest_framework.response import Response
 from rest_framework.permissions import AllowAny, IsAuthenticated
 from rest_framework.authtoken.models import Token
 
-from .models import Term, Course, Category, Lesson, Post, User
+from .models import (
+    Term, Subject, Course, Category, Lesson, Post, User,
+    Enrollment, LessonProgress, Quiz, QuizQuestion, QuizAnswer
+)
 from .serializers import (
-    TermSerializer, CourseSerializer, CourseDetailSerializer,
+    TermSerializer, SubjectSerializer, CourseSerializer, CourseDetailSerializer,
     CategorySerializer, PostSerializer, UserSerializer,
-    RegisterSerializer, LoginSerializer
+    RegisterSerializer, LoginSerializer, QuizSerializer
 )
 
 
@@ -26,9 +31,11 @@ from .serializers import (
 
 def index(request):
     """Bosh sahifa"""
+    subjects = Subject.objects.filter(is_active=True)[:6]
     courses = Course.objects.filter(is_published=True)[:6]
     posts = Post.objects.filter(is_published=True)[:3]
     context = {
+        'subjects': subjects,
         'courses': courses,
         'posts': posts,
     }
@@ -42,26 +49,51 @@ def glossary_page(request):
     return render(request, 'glossary.html', context)
 
 
+def subjects_page(request):
+    """Fanlar ro'yxati sahifasi"""
+    subjects = Subject.objects.filter(is_active=True)
+    context = {'subjects': subjects}
+    return render(request, 'subjects.html', context)
+
+
+def subject_detail(request, slug):
+    """Fan va uning kurslari"""
+    subject = get_object_or_404(Subject, slug=slug, is_active=True)
+    courses = Course.objects.filter(subject=subject, is_published=True).order_by('order')
+    context = {
+        'subject': subject,
+        'courses': courses,
+    }
+    return render(request, 'subject_detail.html', context)
+
+
 def courses_page(request):
     """Kurslar sahifasi"""
     courses = Course.objects.filter(is_published=True)
     categories = Category.objects.all()
-    
+    subjects = Subject.objects.filter(is_active=True)
+
+    # Filter by subject
+    subject_slug = request.GET.get('subject')
+    if subject_slug:
+        courses = courses.filter(subject__slug=subject_slug)
+
     # Filter by category
     category_slug = request.GET.get('category')
     if category_slug:
         courses = courses.filter(category__slug=category_slug)
-    
+
     # Search
     search = request.GET.get('search')
     if search:
         courses = courses.filter(
             Q(title__icontains=search) | Q(description__icontains=search)
         )
-    
+
     context = {
         'courses': courses,
         'categories': categories,
+        'subjects': subjects,
     }
     return render(request, 'courses.html', context)
 
@@ -70,17 +102,173 @@ def course_detail(request, slug):
     """Kurs detallari"""
     course = get_object_or_404(Course, slug=slug, is_published=True)
     lessons = course.lessons.all()
+
+    # Foydalanuvchi progressi
+    completed_lessons = set()
+    if request.user.is_authenticated:
+        completed_lessons = set(
+            LessonProgress.objects.filter(
+                user=request.user, lesson__course=course, completed=True
+            ).values_list('lesson_id', flat=True)
+        )
+
+    # Keyingi va oldingi kurslar (fan ichida)
+    next_course = course.get_next_course()
+    prev_course = course.get_prev_course()
+
     context = {
         'course': course,
         'lessons': lessons,
+        'completed_lessons': completed_lessons,
+        'next_course': next_course,
+        'prev_course': prev_course,
     }
     return render(request, 'course_detail.html', context)
+
+
+def lesson_view(request, pk):
+    """Dars sahifasi - video, maruza fayli, test"""
+    lesson = get_object_or_404(Lesson, pk=pk)
+    course = lesson.course
+    embed_url = lesson.get_youtube_embed_url()
+
+    # Determine video type for template rendering
+    video_type = None
+    if lesson.video_url:
+        url_lower = lesson.video_url.lower()
+        if 'youtube.com' in url_lower or 'youtu.be' in url_lower:
+            video_type = 'youtube'
+        elif any(url_lower.endswith(ext) for ext in ['.mp4', '.webm', '.ogg', '.mov']):
+            video_type = 'direct'
+        else:
+            video_type = 'link'
+
+    # Quiz
+    quiz = None
+    try:
+        quiz = lesson.quiz
+    except Quiz.DoesNotExist:
+        pass
+
+    # Foydalanuvchi progressi
+    progress = None
+    if request.user.is_authenticated:
+        progress, _ = LessonProgress.objects.get_or_create(
+            user=request.user, lesson=lesson
+        )
+
+    # Navigatsiya
+    next_lesson = lesson.get_next_lesson()
+    prev_lesson = lesson.get_prev_lesson()
+
+    # Kurs darslari (sidebar uchun)
+    all_lessons = course.lessons.all()
+    completed_lessons = set()
+    if request.user.is_authenticated:
+        completed_lessons = set(
+            LessonProgress.objects.filter(
+                user=request.user, lesson__course=course, completed=True
+            ).values_list('lesson_id', flat=True)
+        )
+
+    context = {
+        'lesson': lesson,
+        'course': course,
+        'embed_url': embed_url,
+        'video_type': video_type,
+        'quiz': quiz,
+        'progress': progress,
+        'next_lesson': next_lesson,
+        'prev_lesson': prev_lesson,
+        'all_lessons': all_lessons,
+        'completed_lessons': completed_lessons,
+    }
+    return render(request, 'lesson.html', context)
+
+
+@login_required
+def mark_lesson_complete(request, pk):
+    """Darsni bajarilgan deb belgilash"""
+    lesson = get_object_or_404(Lesson, pk=pk)
+    progress, _ = LessonProgress.objects.get_or_create(
+        user=request.user, lesson=lesson
+    )
+    progress.completed = True
+    progress.completed_at = timezone.now()
+    progress.save()
+
+    next_lesson = lesson.get_next_lesson()
+    if next_lesson:
+        return redirect('lesson', pk=next_lesson.pk)
+    return redirect('course_detail', slug=lesson.course.slug)
+
+
+@login_required
+def quiz_submit(request, pk):
+    """Test natijasini tekshirish"""
+    lesson = get_object_or_404(Lesson, pk=pk)
+    quiz = get_object_or_404(Quiz, lesson=lesson)
+
+    if request.method != 'POST':
+        return redirect('lesson', pk=pk)
+
+    questions = quiz.questions.all()
+    total = questions.count()
+    correct = 0
+
+    results = []
+    for question in questions:
+        answer_id = request.POST.get(f'question_{question.pk}')
+        correct_answer = question.answers.filter(is_correct=True).first()
+        user_answer = None
+        is_correct = False
+
+        if answer_id:
+            try:
+                user_answer = question.answers.get(pk=int(answer_id))
+                is_correct = user_answer.is_correct
+                if is_correct:
+                    correct += 1
+            except QuizAnswer.DoesNotExist:
+                pass
+
+        results.append({
+            'question': question,
+            'user_answer': user_answer,
+            'correct_answer': correct_answer,
+            'is_correct': is_correct,
+        })
+
+    score = int((correct / total) * 100) if total > 0 else 0
+    passed = score >= quiz.pass_score
+
+    # Progressni yangilash
+    if request.user.is_authenticated:
+        progress, _ = LessonProgress.objects.get_or_create(
+            user=request.user, lesson=lesson
+        )
+        if passed:
+            progress.quiz_passed = True
+            progress.completed = True
+            progress.completed_at = timezone.now()
+            progress.save()
+
+    context = {
+        'lesson': lesson,
+        'quiz': quiz,
+        'results': results,
+        'score': score,
+        'correct': correct,
+        'total': total,
+        'passed': passed,
+        'next_lesson': lesson.get_next_lesson(),
+    }
+    return render(request, 'quiz_result.html', context)
 
 
 def contact_page(request):
     """Aloqa sahifasi"""
     if request.method == 'POST':
-        # Contact form logic
         messages.success(request, 'Xabaringiz yuborildi!')
         return redirect('contact')
     return render(request, 'contact.html')
@@ -94,11 +282,11 @@ def login_page(request):
     """Login sahifasi"""
     if request.user.is_authenticated:
         return redirect('index')
-    
+
     if request.method == 'POST':
         username = request.POST.get('username')
         password = request.POST.get('password')
-        
+
         user = authenticate(request, username=username, password=password)
         if user:
             login(request, user)
@@ -106,7 +294,7 @@ def login_page(request):
             return redirect('index')
         else:
             messages.error(request, 'Login yoki parol noto\'g\'ri!')
-    
+
     return render(request, 'login.html')
 
 
@@ -114,7 +302,7 @@ def register_page(request):
     """Register sahifasi"""
     if request.user.is_authenticated:
         return redirect('index')
-    
+
     if request.method == 'POST':
         username = request.POST.get('username')
         email = request.POST.get('email')
@@ -122,7 +310,7 @@ def register_page(request):
         password2 = request.POST.get('password2')
         first_name = request.POST.get('first_name')
         last_name = request.POST.get('last_name')
-        
+
         if password != password2:
             messages.error(request, 'Parollar mos kelmadi!')
         elif User.objects.filter(username=username).exists():
@@ -140,7 +328,7 @@ def register_page(request):
             login(request, user)
             messages.success(request, 'Ro\'yxatdan muvaffaqiyatli o\'tdingiz!')
             return redirect('index')
-    
+
     return render(request, 'register.html')
 
 
@@ -155,15 +343,19 @@ def logout_view(request):
 def profile_page(request):
     """Profil sahifasi"""
     enrollments = request.user.enrollments.all()
-    context = {'enrollments': enrollments}
+    lesson_progress = request.user.lesson_progress.filter(completed=True)
+    context = {
+        'enrollments': enrollments,
+        'lesson_progress': lesson_progress,
+    }
     return render(request, 'profile.html', context)
 
+
 def handler404(request, exception):
-    """404 xato sahifasi"""
     return render(request, '404.html', status=404)
 
+
 def handler500(request):
-    """500 xato sahifasi"""
     return render(request, '500.html', status=500)
 
 
@@ -171,12 +363,11 @@ def handler500(request):
 # REST API VIEWS
 # ========================
 
-# User API
 class UserViewSet(viewsets.ModelViewSet):
     queryset = User.objects.all()
     serializer_class = UserSerializer
     permission_classes = [IsAuthenticated]
-    
+
     @action(detail=False, methods=['get'])
     def me(self, request):
         serializer = self.get_serializer(request.user)
@@ -186,7 +377,6 @@ class UserViewSet(viewsets.ModelViewSet):
 @api_view(['POST'])
 @permission_classes([AllowAny])
 def api_register(request):
-    """API Register"""
     serializer = RegisterSerializer(data=request.data)
     if serializer.is_valid():
         user = serializer.save()
@@ -202,12 +392,10 @@ def api_register(request):
 @api_view(['POST'])
 @permission_classes([AllowAny])
 def api_login(request):
-    """API Login"""
     serializer = LoginSerializer(data=request.data)
     if serializer.is_valid():
         username = serializer.validated_data['username']
         password = serializer.validated_data['password']
-        
         user = authenticate(username=username, password=password)
         if user:
             token, created = Token.objects.get_or_create(user=user)
@@ -216,29 +404,26 @@ def api_login(request):
                 'token': token.key,
                 'message': 'Xush kelibsiz!'
             })
-        return Response({
-            'error': 'Login yoki parol noto\'g\'ri!'
-        }, status=status.HTTP_401_UNAUTHORIZED)
+        return Response({'error': 'Login yoki parol noto\'g\'ri!'},
+                        status=status.HTTP_401_UNAUTHORIZED)
     return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 
 @api_view(['POST'])
 @permission_classes([IsAuthenticated])
 def api_logout(request):
-    """API Logout"""
     try:
         request.user.auth_token.delete()
         return Response({'message': 'Muvaffaqiyatli chiqildi!'})
-    except:
+    except Exception:
         return Response({'error': 'Xatolik'}, status=status.HTTP_400_BAD_REQUEST)
 
 
-# Glossary API
 class TermViewSet(viewsets.ModelViewSet):
     queryset = Term.objects.filter(is_active=True)
     serializer_class = TermSerializer
     permission_classes = [AllowAny]
-    
+
     @action(detail=False, methods=['get'])
     def search(self, request):
         query = request.query_params.get('q', '')
@@ -249,24 +434,38 @@ class TermViewSet(viewsets.ModelViewSet):
         return Response(serializer.data)
 
 
-# Course API
+class SubjectViewSet(viewsets.ReadOnlyModelViewSet):
+    queryset = Subject.objects.filter(is_active=True)
+    serializer_class = SubjectSerializer
+    permission_classes = [AllowAny]
+
+
 class CourseViewSet(viewsets.ReadOnlyModelViewSet):
     queryset = Course.objects.filter(is_published=True)
     permission_classes = [AllowAny]
-    
+
     def get_serializer_class(self):
         if self.action == 'retrieve':
             return CourseDetailSerializer
         return CourseSerializer
-    
+
     @action(detail=False, methods=['get'])
     def categories(self, request):
         categories = Category.objects.all()
         serializer = CategorySerializer(categories, many=True)
         return Response(serializer.data)
 
+    @action(detail=False, methods=['get'])
+    def by_subject(self, request):
+        subject_slug = request.query_params.get('slug')
+        if subject_slug:
+            courses = self.queryset.filter(subject__slug=subject_slug).order_by('order')
+        else:
+            courses = self.queryset
+        serializer = CourseSerializer(courses, many=True)
+        return Response(serializer.data)
 
-# Post API
+
 class PostViewSet(viewsets.ReadOnlyModelViewSet):
     queryset = Post.objects.filter(is_published=True)
     serializer_class = PostSerializer

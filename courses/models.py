@@ -4,6 +4,7 @@ from django.db import models
 from django.contrib.auth.models import AbstractUser
 from ckeditor.fields import RichTextField
 
+
 # ========================
 # USER MODEL
 # ========================
@@ -28,7 +29,7 @@ class User(AbstractUser):
 class Term(models.Model):
     """Lug'at atamasi - CKEditor bilan"""
     title = models.CharField(max_length=200, verbose_name="Atama")
-    description = RichTextField(verbose_name="Ta'rif", config_name='default')  # CKEditor
+    description = RichTextField(verbose_name="Ta'rif", config_name='default')
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
     order = models.IntegerField(default=0, verbose_name="Tartib")
@@ -41,6 +42,31 @@ class Term(models.Model):
     
     def __str__(self):
         return self.title
+
+
+# ========================
+# SUBJECT MODEL (FAN)
+# ========================
+class Subject(models.Model):
+    """Fan - Matematika, Fizika, Informatika va h.k."""
+    name = models.CharField(max_length=200, verbose_name="Fan nomi")
+    slug = models.SlugField(unique=True, verbose_name="Slug")
+    description = models.TextField(blank=True, verbose_name="Tavsif")
+    icon = models.CharField(max_length=100, blank=True, verbose_name="Icon (Bootstrap)")
+    image = models.ImageField(upload_to='subjects/', blank=True, null=True, verbose_name="Rasm")
+    order = models.IntegerField(default=0, verbose_name="Tartib")
+    is_active = models.BooleanField(default=True, verbose_name="Faol")
+    
+    class Meta:
+        ordering = ['order', 'name']
+        verbose_name = "Fan"
+        verbose_name_plural = "Fanlar"
+    
+    def __str__(self):
+        return self.name
+    
+    def get_courses_count(self):
+        return self.courses.filter(is_published=True).count()
 
 
 # ========================
@@ -67,9 +93,14 @@ class Course(models.Model):
     """Kurslar"""
     title = models.CharField(max_length=200, verbose_name="Kurs nomi")
     slug = models.SlugField(unique=True)
+    subject = models.ForeignKey(
+        Subject, on_delete=models.SET_NULL, null=True, blank=True,
+        related_name='courses', verbose_name="Fan"
+    )
     category = models.ForeignKey(Category, on_delete=models.CASCADE, related_name='courses')
     description = RichTextField(verbose_name="Tavsif", config_name='default')
-    image = models.ImageField(upload_to='courses/', blank=True, null=True)
+    image = models.ImageField(upload_to='courses/', blank=True, null=True, verbose_name="Rasm")
+    video_url = models.URLField(blank=True, null=True, verbose_name="Preview Video URL")
     instructor = models.ForeignKey(User, on_delete=models.SET_NULL, null=True, related_name='courses')
     duration = models.CharField(max_length=50, verbose_name="Davomiyligi")
     level = models.CharField(max_length=20, choices=[
@@ -80,16 +111,40 @@ class Course(models.Model):
     price = models.DecimalField(max_digits=10, decimal_places=2, default=0)
     is_free = models.BooleanField(default=False, verbose_name="Bepul")
     is_published = models.BooleanField(default=False, verbose_name="Nashr qilingan")
+    order = models.IntegerField(default=0, verbose_name="Fan ichidagi tartib")
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
     
     class Meta:
-        ordering = ['-created_at']
+        ordering = ['order', '-created_at']
         verbose_name = "Kurs"
         verbose_name_plural = "Kurslar"
     
     def __str__(self):
         return self.title
+    
+    def get_first_lesson(self):
+        return self.lessons.first()
+    
+    def get_next_course(self):
+        """Shu fandagi keyingi kurs"""
+        if self.subject:
+            return Course.objects.filter(
+                subject=self.subject,
+                order__gt=self.order,
+                is_published=True
+            ).first()
+        return None
+    
+    def get_prev_course(self):
+        """Shu fandagi oldingi kurs"""
+        if self.subject:
+            return Course.objects.filter(
+                subject=self.subject,
+                order__lt=self.order,
+                is_published=True
+            ).last()
+        return None
 
 
 class Lesson(models.Model):
@@ -97,10 +152,14 @@ class Lesson(models.Model):
     course = models.ForeignKey(Course, on_delete=models.CASCADE, related_name='lessons')
     title = models.CharField(max_length=200, verbose_name="Dars nomi")
     content = RichTextField(verbose_name="Dars matni", config_name='default')
-    video_url = models.URLField(blank=True, null=True, verbose_name="Video URL")
+    video_url = models.URLField(blank=True, null=True, verbose_name="Video URL (YouTube)")
+    lecture_file = models.FileField(
+        upload_to='lectures/', blank=True, null=True,
+        verbose_name="Maruza fayli (PDF/Word)"
+    )
     order = models.IntegerField(default=0)
-    duration = models.CharField(max_length=20, blank=True)
-    is_free = models.BooleanField(default=False)
+    duration = models.CharField(max_length=20, blank=True, verbose_name="Davomiyligi")
+    is_free = models.BooleanField(default=False, verbose_name="Bepul")
     
     class Meta:
         ordering = ['order']
@@ -109,6 +168,40 @@ class Lesson(models.Model):
     
     def __str__(self):
         return f"{self.course.title} - {self.title}"
+    
+    def get_next_lesson(self):
+        return Lesson.objects.filter(
+            course=self.course, order__gt=self.order
+        ).first()
+    
+    def get_prev_lesson(self):
+        return Lesson.objects.filter(
+            course=self.course, order__lt=self.order
+        ).last()
+    
+    def get_youtube_video_id(self):
+        """YouTube video ID ni ajratib oladi"""
+        if not self.video_url:
+            return None
+        url = self.video_url
+        if 'watch?v=' in url:
+            return url.split('watch?v=')[-1].split('&')[0]
+        elif 'youtu.be/' in url:
+            return url.split('youtu.be/')[-1].split('?')[0]
+        elif 'embed/' in url:
+            return url.split('embed/')[-1].split('?')[0]
+        return None
+
+    def get_youtube_embed_url(self):
+        """YouTube URL ni embed formatga o'tkazadi (privacy-enhanced mode)"""
+        if not self.video_url:
+            return None
+        video_id = self.get_youtube_video_id()
+        if video_id:
+            # youtube-nocookie.com - Error 153 ni kamaytiradi, privacy-enhanced
+            return f"https://www.youtube-nocookie.com/embed/{video_id}?rel=0&modestbranding=1"
+        # YouTube emas - URL ni to'g'ridan-to'g'ri qaytaradi
+        return self.video_url
 
 
 class Enrollment(models.Model):
@@ -126,6 +219,72 @@ class Enrollment(models.Model):
     
     def __str__(self):
         return f"{self.user.username} - {self.course.title}"
+
+
+class LessonProgress(models.Model):
+    """Foydalanuvchi dars progressi"""
+    user = models.ForeignKey(User, on_delete=models.CASCADE, related_name='lesson_progress')
+    lesson = models.ForeignKey(Lesson, on_delete=models.CASCADE, related_name='progress_records')
+    completed = models.BooleanField(default=False, verbose_name="Bajarildi")
+    quiz_passed = models.BooleanField(default=False, verbose_name="Test o'tdi")
+    completed_at = models.DateTimeField(null=True, blank=True)
+    
+    class Meta:
+        unique_together = ['user', 'lesson']
+        verbose_name = "Dars progressi"
+        verbose_name_plural = "Dars progresslari"
+    
+    def __str__(self):
+        return f"{self.user.username} - {self.lesson.title}"
+
+
+# ========================
+# QUIZ MODELS
+# ========================
+class Quiz(models.Model):
+    """Dars testi"""
+    lesson = models.OneToOneField(
+        Lesson, on_delete=models.CASCADE, related_name='quiz',
+        verbose_name="Dars"
+    )
+    title = models.CharField(max_length=200, verbose_name="Test nomi")
+    pass_score = models.IntegerField(default=60, verbose_name="O'tish balli (%)")
+    
+    class Meta:
+        verbose_name = "Test"
+        verbose_name_plural = "Testlar"
+    
+    def __str__(self):
+        return f"{self.lesson.title} - Test"
+
+
+class QuizQuestion(models.Model):
+    """Test savoli"""
+    quiz = models.ForeignKey(Quiz, on_delete=models.CASCADE, related_name='questions')
+    question = models.TextField(verbose_name="Savol")
+    order = models.IntegerField(default=0, verbose_name="Tartib")
+    
+    class Meta:
+        ordering = ['order']
+        verbose_name = "Savol"
+        verbose_name_plural = "Savollar"
+    
+    def __str__(self):
+        return f"{self.quiz} - {self.question[:50]}"
+
+
+class QuizAnswer(models.Model):
+    """Test javobi"""
+    question = models.ForeignKey(QuizQuestion, on_delete=models.CASCADE, related_name='answers')
+    text = models.CharField(max_length=500, verbose_name="Javob matni")
+    is_correct = models.BooleanField(default=False, verbose_name="To'g'ri javob")
+    
+    class Meta:
+        verbose_name = "Javob"
+        verbose_name_plural = "Javoblar"
+    
+    def __str__(self):
+        return f"{self.text[:50]} {'✓' if self.is_correct else '✗'}"
 
 
 # ========================

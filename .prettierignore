@@ -1,0 +1,4 @@
+# Django templates - Prettier should NOT touch these files
+# because it breaks Django template tags like {% if x == y %}
+templates/
+*.html

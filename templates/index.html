@@ -1,7 +1,7 @@
 <!-- templates/index.html -->
 {% extends 'base.html' %}
 
-{% block title %}Bosh sahifa - Media Kompetentlik{% endblock %}
+{% block title %}Bosh sahifa - Home Education{% endblock %}
 
 {% block content %}
 <!-- Hero Section -->
@@ -10,10 +10,10 @@
         <div class="row align-items-center">
             <div class="col-lg-6" data-aos="fade-right">
                 <h1 class="display-4 fw-bold mb-4">
-                    Raqamli Media Kompetentlik
+                    Home Education
                 </h1>
                 <p class="lead mb-4">
-                    Zamonaviy axborot texnologiyalari va media savodxonlik sohasida 
+                    Zamonaviy axborot texnologiyalari va media savodxonlik sohasida
                     professional bilimlar va ko'nikmalarni egallang.
                 </p>
                 <div class="d-flex gap-3">
@@ -26,8 +26,8 @@
                 </div>
             </div>
             <div class="col-lg-6 mt-5 mt-lg-0" data-aos="fade-left">
-                <img src="https://images.unsplash.com/photo-1522202176988-66273c2fd55f?w=600" 
-                     alt="Learning" class="img-fluid rounded shadow-lg">
+                <img src="https://images.unsplash.com/photo-1522202176988-66273c2fd55f?w=600" alt="Learning"
+                    class="img-fluid rounded shadow-lg">
             </div>
         </div>
     </div>
@@ -76,7 +76,7 @@
             <h2 class="section-title">Mashhur Kurslar</h2>
             <p class="text-muted">Eng yaxshi va mashhur kurslarimiz bilan tanishing</p>
         </div>
-        
+
         <div class="row">
             {% for course in courses %}
             <div class="col-lg-4 col-md-6 mb-4" data-aos="fade-up" data-aos-delay="{{ forloop.counter0|add:100 }}">
@@ -84,8 +84,8 @@
                     {% if course.image %}
                     <img src="{{ course.image.url }}" class="card-img-top" alt="{{ course.title }}">
                     {% else %}
-                    <img src="https://images.unsplash.com/photo-1516321318423-f06f85e504b3?w=400" 
-                         class="card-img-top" alt="{{ course.title }}">
+                    <img src="https://images.unsplash.com/photo-1516321318423-f06f85e504b3?w=400" class="card-img-top"
+                        alt="{{ course.title }}">
                     {% endif %}
                     <div class="card-body">
                         <div class="d-flex justify-content-between align-items-start mb-2">
@@ -120,7 +120,7 @@
             </div>
             {% endfor %}
         </div>
-        
+
         {% if courses %}
         <div class="text-center mt-4">
             <a href="{% url 'courses' %}" class="btn btn-outline-primary btn-lg">
@@ -138,7 +138,7 @@
             <h2 class="section-title">Nima uchun bizni tanlash kerak?</h2>
             <p class="text-muted">Professional ta'lim va zamonaviy yondashuv</p>
         </div>
-        
+
         <div class="row">
             <div class="col-md-4 mb-4" data-aos="fade-up" data-aos-delay="0">
                 <div class="card h-100 border-0 shadow-sm">
@@ -153,7 +153,7 @@
                     </div>
                 </div>
             </div>
-            
+
             <div class="col-md-4 mb-4" data-aos="fade-up" data-aos-delay="100">
                 <div class="card h-100 border-0 shadow-sm">
                     <div class="card-body text-center p-4">
@@ -167,7 +167,7 @@
                     </div>
                 </div>
             </div>
-            
+
             <div class="col-md-4 mb-4" data-aos="fade-up" data-aos-delay="200">
                 <div class="card h-100 border-0 shadow-sm">
                     <div class="card-body text-center p-4">

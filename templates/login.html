@@ -1,86 +1,161 @@
-<!DOCTYPE html>
-<html lang="uz">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Kirish - Media Kompetentlik</title>
-    
-    <link href="assets/css/bootstrap.min.css" rel="stylesheet">
-    <link href="assets/css/auth.css" rel="stylesheet">
-</head>
-<body class="auth-body">
+{% extends 'base.html' %}
+
+{% block title %}Kirish - Home Education{% endblock %}
+
+{% block extra_css %}
+<style>
+    .auth-section {
+        min-height: calc(100vh - 80px);
+        display: flex;
+        align-items: center;
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        padding: 40px 0;
+    }
+
+    .auth-card {
+        background: white;
+        border-radius: 24px;
+        padding: 40px;
+        box-shadow: 0 20px 60px rgba(0, 0, 0, 0.15);
+    }
+
+    .auth-logo {
+        width: 70px;
+        height: 70px;
+        background: linear-gradient(135deg, #667eea, #764ba2);
+        border-radius: 20px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 2rem;
+        color: white;
+        margin: 0 auto 20px;
+    }
+
+    .form-control {
+        border-radius: 12px;
+        padding: 12px 16px;
+        border: 2px solid #e8e8e8;
+        transition: border-color 0.2s;
+    }
+
+    .form-control:focus {
+        border-color: #667eea;
+        box-shadow: none;
+    }
+
+    .btn-login {
+        border-radius: 12px;
+        padding: 14px;
+        font-size: 1rem;
+        font-weight: 700;
+        background: linear-gradient(135deg, #667eea, #764ba2);
+        border: none;
+    }
+
+    .btn-login:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 8px 20px rgba(102, 126, 234, 0.4);
+    }
+
+    .divider {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        color: #aaa;
+        font-size: 0.85rem;
+    }
+
+    .divider::before,
+    .divider::after {
+        content: '';
+        flex: 1;
+        height: 1px;
+        background: #e8e8e8;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<section class="auth-section">
     <div class="container">
-        <div class="row justify-content-center align-items-center min-vh-100">
-            <div class="col-md-5">
+        <div class="row justify-content-center">
+            <div class="col-md-5 col-lg-4">
                 <div class="auth-card">
+
                     <!-- Logo -->
                     <div class="text-center mb-4">
-                        <h2 class="auth-title">Tizimga Kirish</h2>
-                        <p class="text-muted">Media Kompetentlik platformasiga xush kelibsiz</p>
+                        <div class="auth-logo">
+                            <i class="bi bi-mortarboard-fill"></i>
+                        </div>
+                        <h3 class="fw-bold mb-1">Tizimga Kirish</h3>
+                        <p class="text-muted small mb-0">Home Education platformasiga xush kelibsiz</p>
                     </div>
-                    
-                    <!-- Alert -->
-                    <div id="alertBox" class="alert alert-dismissible fade" role="alert" style="display: none;">
-                        <span id="alertMessage"></span>
-                        <button type="button" class="btn-close" onclick="hideAlert()"></button>
+
+                    <!-- Django messages -->
+                    {% if messages %}
+                    {% for message in messages %}
+                    <div class="alert alert-{{ message.tags }} alert-dismissible fade show rounded-3" role="alert">
+                        {{ message }}
+                        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
                     </div>
-                    
+                    {% endfor %}
+                    {% endif %}
+
                     <!-- Login Form -->
-                    <form id="loginForm">
+                    <form method="POST" action="{% url 'login' %}">
+                        {% csrf_token %}
+
                         <div class="mb-3">
-                            <label for="username" class="form-label">
-                                <i class="bi bi-person"></i> Foydalanuvchi nomi
+                            <label for="username" class="form-label fw-semibold">
+                                <i class="bi bi-person me-1"></i>Foydalanuvchi nomi
                             </label>
-                            <input type="text" class="form-control" id="username" 
-                                   placeholder="Username" required>
+                            <input type="text" class="form-control" id="username" name="username" placeholder="Username"
+                                required autofocus>
                         </div>
-                        
+
                         <div class="mb-3">
-                            <label for="password" class="form-label">
-                                <i class="bi bi-lock"></i> Parol
+                            <label for="password" class="form-label fw-semibold">
+                                <i class="bi bi-lock me-1"></i>Parol
                             </label>
-                            <input type="password" class="form-control" id="password" 
-                                   placeholder="••••••••" required>
+                            <input type="password" class="form-control" id="password" name="password"
+                                placeholder="••••••••" required>
                         </div>
-                        
-                        <div class="mb-3 form-check">
-                            <input type="checkbox" class="form-check-input" id="rememberMe">
-                            <label class="form-check-label" for="rememberMe">
+
+                        <div class="mb-4 form-check">
+                            <input type="checkbox" class="form-check-input" id="rememberMe" name="remember">
+                            <label class="form-check-label text-muted" for="rememberMe">
                                 Meni eslab qol
                             </label>
                         </div>
-                        
-                        <button type="submit" class="btn btn-primary w-100 btn-lg" id="loginBtn">
-                            <span id="loginBtnText">Kirish</span>
-                            <span id="loginSpinner" class="spinner-border spinner-border-sm" 
-                                  style="display: none;"></span>
+
+                        <button type="submit" class="btn btn-primary w-100 btn-login">
+                            <i class="bi bi-box-arrow-in-right me-2"></i>Kirish
                         </button>
                     </form>
-                    
-                    <hr class="my-4">
-                    
+
+                    <div class="divider my-4">yoki</div>
+
                     <!-- Register Link -->
                     <div class="text-center">
-                        <p class="mb-0">
-                            Akkauntingiz yo'qmi? 
-                            <a href="register.html" class="text-decoration-none fw-bold">
-                                Ro'yxatdan o'tish
-                            </a>
+                        <p class="mb-3 text-muted">
+                            Akkauntingiz yo'qmi?
                         </p>
+                        <a href="{% url 'register' %}" class="btn btn-outline-primary w-100"
+                            style="border-radius:12px; padding:12px; font-weight:600;">
+                            <i class="bi bi-person-plus me-2"></i>Ro'yxatdan o'tish
+                        </a>
                     </div>
-                    
+
                     <!-- Back to Home -->
-                    <div class="text-center mt-3">
-                        <a href="index.html" class="text-muted text-decoration-none">
-                            <i class="bi bi-arrow-left"></i> Bosh sahifaga qaytish
+                    <div class="text-center mt-4">
+                        <a href="{% url 'index' %}" class="text-muted text-decoration-none small">
+                            <i class="bi bi-arrow-left me-1"></i>Bosh sahifaga qaytish
                         </a>
                     </div>
                 </div>
             </div>
         </div>
     </div>
-
-    <script src="assets/js/bootstrap.bundle.min.js"></script>
-    <script src="assets/js/auth.js"></script>
-</body>
-</html>
+</section>
+{% endblock %}

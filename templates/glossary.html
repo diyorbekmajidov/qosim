@@ -1,7 +1,7 @@
 <!-- templates/glossary.html -->
 {% extends 'base.html' %}
 
-{% block title %}Glossary - Media Kompetentlik{% endblock %}
+{% block title %}Glossary - Home Education{% endblock %}
 
 {% block content %}
 <!-- Page Header -->
@@ -27,8 +27,7 @@
                     <span class="input-group-text bg-white">
                         <i class="bi bi-search"></i>
                     </span>
-                    <input type="text" class="form-control" id="searchInput" 
-                           placeholder="Atama qidirish...">
+                    <input type="text" class="form-control" id="searchInput" placeholder="Atama qidirish...">
                 </div>
             </div>
         </div>
@@ -47,7 +46,7 @@
                     <button class="btn btn-sm btn-outline-primary" data-letter="{{ letter }}">{{ letter }}</button>
                     {% endfor %}
                 </div>
-                
+
                 <!-- Terms Table -->
                 <div class="card border-0 shadow-sm">
                     <div class="card-body p-0">
@@ -82,7 +81,7 @@
                         </div>
                     </div>
                 </div>
-                
+
                 <!-- No Results Message -->
                 <div id="noResults" class="text-center py-5" style="display: none;">
                     <i class="bi bi-search text-muted" style="font-size: 3rem;"></i>
@@ -102,14 +101,14 @@
     const noResults = document.getElementById('noResults');
     const allRows = Array.from(termsTableBody.querySelectorAll('tr'));
 
-    searchInput.addEventListener('input', function(e) {
+    searchInput.addEventListener('input', function (e) {
         const searchTerm = e.target.value.toLowerCase();
         let visibleCount = 0;
 
         allRows.forEach(row => {
             const title = row.querySelector('strong')?.textContent.toLowerCase() || '';
             const description = row.cells[1]?.textContent.toLowerCase() || '';
-            
+
             if (title.includes(searchTerm) || description.includes(searchTerm)) {
                 row.style.display = '';
                 visibleCount++;
@@ -127,16 +126,16 @@
 
     // Alphabet filter
     document.querySelectorAll('[data-letter]').forEach(btn => {
-        btn.addEventListener('click', function() {
+        btn.addEventListener('click', function () {
             document.querySelectorAll('[data-letter]').forEach(b => b.classList.remove('active'));
             this.classList.add('active');
-            
+
             const letter = this.dataset.letter;
             let visibleCount = 0;
 
             allRows.forEach(row => {
                 const title = row.querySelector('strong')?.textContent || '';
-                
+
                 if (letter === 'all' || title.toUpperCase().startsWith(letter)) {
                     row.style.display = '';
                     visibleCount++;

@@ -5,7 +5,7 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 
 SECRET_KEY = 'django-insecure-6%6@=z@2jgui%^m3%f2m!brvi#*s4^3@vr&yrz@q#n7*ylvabu'
 
-DEBUG = False
+DEBUG = True
 
 ALLOWED_HOSTS = ['*']
 
@@ -70,23 +70,23 @@ TEMPLATES = [
 
 WSGI_APPLICATION = 'core.wsgi.application'
 
-# DATABASES = {
-#     'default': {
-#         'ENGINE': 'django.db.backends.sqlite3',
-#         'NAME': BASE_DIR / 'db.sqlite3',
-#     }
-# }
-
 DATABASES = {
     'default': {
-        'ENGINE': 'django.db.backends.postgresql_psycopg2',
-        'NAME': 'qosim',
-        'USER': 'qosim',
-        'PASSWORD': 'qosim',
-        'HOST': 'localhost',
-        'PORT': '',
+        'ENGINE': 'django.db.backends.sqlite3',
+        'NAME': BASE_DIR / 'db.sqlite3',
     }
 }
+
+# DATABASES = {
+#     'default': {
+#         'ENGINE': 'django.db.backends.postgresql_psycopg2',
+#         'NAME': 'qosim',
+#         'USER': 'qosim',
+#         'PASSWORD': 'qosim',
+#         'HOST': 'localhost',
+#         'PORT': '',
+#     }
+# }
 
 AUTH_PASSWORD_VALIDATORS = [
     {'NAME': 'django.contrib.auth.password_validation.UserAttributeSimilarityValidator'},
@@ -161,11 +161,11 @@ CKEDITOR_CONFIGS = {
 
 # Jazzmin Settings
 JAZZMIN_SETTINGS = {
-    "site_title": "Media Kompetentlik Admin",
-    "site_header": "Media Kompetentlik",
-    "site_brand": "Media Kompetentlik",
+    "site_title": "Home Education Admin",
+    "site_header": "Home Education",
+    "site_brand": "Home Education",
     "welcome_sign": "Xush kelibsiz!",
-    "copyright": "Media Kompetentlik",
+    "copyright": "Home Education",
     "search_model": "courses.User",
     "topmenu_links": [
         {"name": "Bosh sahifa", "url": "admin:index"},
