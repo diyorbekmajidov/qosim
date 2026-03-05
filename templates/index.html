@@ -4,6 +4,7 @@
 {% block title %}Bosh sahifa - Home Education{% endblock %}
 
 {% block content %}
+{% load static %}
 <!-- Hero Section -->
 <section class="hero-section">
     <div class="container hero-content">
@@ -26,7 +27,7 @@
                 </div>
             </div>
             <div class="col-lg-6 mt-5 mt-lg-0" data-aos="fade-left">
-                <img src="https://images.unsplash.com/photo-1522202176988-66273c2fd55f?w=600" alt="Learning"
+                <img src="{% static 'assets/images/homeschool.jpg' %}" alt="Learning"
                     class="img-fluid rounded shadow-lg">
             </div>
         </div>
