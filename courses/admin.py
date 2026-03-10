@@ -16,12 +16,12 @@ class UserAdmin(BaseUserAdmin):
     )
 
 
-@admin.register(Term)
-class TermAdmin(admin.ModelAdmin):
-    list_display = ['title', 'order', 'is_active', 'created_at']
-    list_filter = ['is_active', 'created_at']
-    search_fields = ['title', 'description']
-    list_editable = ['order', 'is_active']
+# @admin.register(Term)
+# class TermAdmin(admin.ModelAdmin):
+#     list_display = ['title', 'order', 'is_active', 'created_at']
+#     list_filter = ['is_active', 'created_at']
+#     search_fields = ['title', 'description']
+#     list_editable = ['order', 'is_active']
 
 
 @admin.register(Subject)
