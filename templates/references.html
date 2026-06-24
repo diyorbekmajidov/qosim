@@ -1,0 +1,248 @@
+{% extends 'base.html' %}
+
+{% block title %}Foydalanilgan Adabiyotlar - Home Education{% endblock %}
+
+{% block content %}
+<!-- Hero Section -->
+<section class="hero-section py-5">
+    <div class="container hero-content">
+        <div class="row">
+            <div class="col-lg-8 mx-auto text-center">
+                <div class="mb-3">
+                    <i class="bi bi-bookmark-star" style="font-size: 3rem; opacity: 0.9;"></i>
+                </div>
+                <h1 class="display-4 fw-bold mb-3">Foydalanilgan Adabiyotlar</h1>
+                <p class="lead">
+                    Kurs materiallarini tayyorlashda foydalanilgan ilmiy va uslubiy manbalar ro'yxati
+                </p>
+                <div class="d-flex justify-content-center gap-3 mt-4 flex-wrap">
+                    <span class="badge bg-white text-dark px-3 py-2 rounded-pill fs-6">
+                        <i class="bi bi-collection text-primary"></i> {{ total_count }} ta manba
+                    </span>
+                    {% for key, cat in categories.items %}
+                    <span class="badge bg-white text-dark px-3 py-2 rounded-pill fs-6">
+                        <i class="{{ cat.icon }}" style="color: {{ cat.color }}"></i> {{ cat.label }}: {{ cat.items|length }}
+                    </span>
+                    {% endfor %}
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Search Section -->
+<section class="py-3 bg-light">
+    <div class="container">
+        <div class="row justify-content-center">
+            <div class="col-md-6">
+                <div class="input-group input-group-lg shadow-sm">
+                    <span class="input-group-text bg-white border-end-0">
+                        <i class="bi bi-search text-muted"></i>
+                    </span>
+                    <input type="text" class="form-control border-start-0" id="refSearch"
+                        placeholder="Adabiyot yoki muallif qidirish...">
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- References Content -->
+<section class="py-5">
+    <div class="container">
+        {% if categories %}
+            {% for key, cat in categories.items %}
+            <div class="ref-category mb-5" data-aos="fade-up">
+                <!-- Category Header -->
+                <div class="category-header d-flex align-items-center mb-4">
+                    <div class="category-icon me-3"
+                        style="width: 48px; height: 48px; background: {{ cat.color }}20; border-radius: 12px; display: flex; align-items: center; justify-content: center;">
+                        <i class="{{ cat.icon }}" style="font-size: 1.4rem; color: {{ cat.color }};"></i>
+                    </div>
+                    <div>
+                        <h3 class="mb-0 fw-bold">{{ cat.label }}</h3>
+                        <small class="text-muted">{{ cat.items|length }} ta manba</small>
+                    </div>
+                    <div class="ms-auto">
+                        <span class="badge rounded-pill px-3 py-2"
+                            style="background: {{ cat.color }}20; color: {{ cat.color }};">
+                            {{ cat.items|length }}
+                        </span>
+                    </div>
+                </div>
+
+                <!-- References List -->
+                <div class="references-list">
+                    {% for ref in cat.items %}
+                    <div class="ref-item card border-0 shadow-sm mb-3 ref-searchable"
+                        data-title="{{ ref.title|lower }}"
+                        data-authors="{{ ref.authors|lower }}"
+                        style="border-radius: 12px; transition: all 0.3s ease;">
+                        <div class="card-body p-4">
+                            <div class="row align-items-center">
+                                <div class="col-auto">
+                                    <div class="ref-number"
+                                        style="width: 40px; height: 40px; background: {{ cat.color }}15; border-radius: 10px; display: flex; align-items: center; justify-content: center; font-weight: bold; color: {{ cat.color }}; font-size: 0.9rem;">
+                                        {{ forloop.counter }}
+                                    </div>
+                                </div>
+                                <div class="col">
+                                    <h6 class="fw-bold mb-1">{{ ref.title }}</h6>
+                                    <div class="text-muted small d-flex flex-wrap gap-3">
+                                        {% if ref.authors %}
+                                        <span><i class="bi bi-person me-1"></i>{{ ref.authors }}</span>
+                                        {% endif %}
+                                        {% if ref.year %}
+                                        <span><i class="bi bi-calendar me-1"></i>{{ ref.year }}</span>
+                                        {% endif %}
+                                        {% if ref.publisher %}
+                                        <span><i class="bi bi-building me-1"></i>{{ ref.publisher }}</span>
+                                        {% endif %}
+                                    </div>
+                                </div>
+                                {% if ref.url %}
+                                <div class="col-auto">
+                                    <a href="{{ ref.url }}" target="_blank"
+                                        class="btn btn-sm btn-outline-primary rounded-pill px-3">
+                                        <i class="bi bi-box-arrow-up-right me-1"></i>Ochish
+                                    </a>
+                                </div>
+                                {% endif %}
+                            </div>
+                        </div>
+                    </div>
+                    {% endfor %}
+                </div>
+            </div>
+            {% endfor %}
+
+        {% else %}
+        <!-- Empty state — admin hali adabiyotlar qo'shmagan -->
+        <div class="text-center py-5">
+            <div class="mx-auto" style="max-width: 400px;">
+                <div class="mb-4">
+                    <div class="mx-auto mb-3"
+                        style="width: 120px; height: 120px; background: #667eea15; border-radius: 50%; display: flex; align-items: center; justify-content: center;">
+                        <i class="bi bi-bookmarks" style="font-size: 3.5rem; color: #667eea;"></i>
+                    </div>
+                </div>
+                <h3 class="fw-bold mb-2">Adabiyotlar qo'shilmagan</h3>
+                <p class="text-muted">
+                    Administrator adabiyotlar ro'yxatini yaqinda qo'shadi.
+                </p>
+            </div>
+        </div>
+        {% endif %}
+
+        <!-- No search results -->
+        <div id="noRefResults" class="text-center py-5 d-none">
+            <i class="bi bi-search text-muted" style="font-size: 3rem;"></i>
+            <p class="text-muted mt-3">Qidiruv bo'yicha natija topilmadi</p>
+        </div>
+    </div>
+</section>
+
+<!-- Citation Guide -->
+<section class="py-5 bg-light">
+    <div class="container">
+        <div class="row align-items-center">
+            <div class="col-lg-7" data-aos="fade-right">
+                <h3 class="fw-bold mb-3">
+                    <i class="bi bi-quote text-primary me-2"></i>Iqtibos qoidalari
+                </h3>
+                <p class="text-muted">
+                    Ilmiy ishlarda manbalardan to'g'ri foydalanish muhimdir. Iqtibos keltirishda quyidagi
+                    standartlarga rioya qiling:
+                </p>
+                <div class="row g-3 mt-2">
+                    <div class="col-md-6">
+                        <div class="citation-card p-3 rounded-3 bg-white shadow-sm">
+                            <h6 class="fw-bold text-primary mb-2"><i class="bi bi-book me-1"></i>Kitob</h6>
+                            <p class="small text-muted mb-0">
+                                Muallif F.I.O. (Yil). <em>Kitob nomi</em>. Nashriyot.
+                            </p>
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="citation-card p-3 rounded-3 bg-white shadow-sm">
+                            <h6 class="fw-bold text-success mb-2"><i class="bi bi-file-text me-1"></i>Maqola</h6>
+                            <p class="small text-muted mb-0">
+                                Muallif (Yil). Maqola nomi. <em>Jurnal</em>, Jild(Raqam), Sahifalar.
+                            </p>
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="citation-card p-3 rounded-3 bg-white shadow-sm">
+                            <h6 class="fw-bold text-info mb-2"><i class="bi bi-globe me-1"></i>Veb-sayt</h6>
+                            <p class="small text-muted mb-0">
+                                Muallif (Yil). Sahifa nomi. URL: [havola]. [Kirish sanasi].
+                            </p>
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="citation-card p-3 rounded-3 bg-white shadow-sm">
+                            <h6 class="fw-bold text-warning mb-2"><i class="bi bi-play-circle me-1"></i>Video</h6>
+                            <p class="small text-muted mb-0">
+                                Muallif (Yil). <em>Video nomi</em> [Video]. Platforma. URL.
+                            </p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-lg-5 text-center mt-4 mt-lg-0" data-aos="fade-left">
+                <div class="p-5 rounded-3 text-white"
+                    style="background: linear-gradient(135deg, #667eea, #764ba2);">
+                    <i class="bi bi-shield-check" style="font-size: 4rem; opacity: 0.8;"></i>
+                    <h4 class="mt-3 fw-bold">Akademik halollik</h4>
+                    <p class="mb-0 opacity-90">
+                        Boshqa mualliflar asarlaridan to'g'ri foydalanish ilmiy va axloqiy majburiyatingizdir.
+                    </p>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    const refSearch = document.getElementById('refSearch');
+    const refItems = document.querySelectorAll('.ref-searchable');
+    const noRefResults = document.getElementById('noRefResults');
+
+    if (refSearch) {
+        refSearch.addEventListener('input', function() {
+            const q = this.value.toLowerCase().trim();
+            let visible = 0;
+
+            refItems.forEach(item => {
+                const title = item.dataset.title || '';
+                const authors = item.dataset.authors || '';
+                if (!q || title.includes(q) || authors.includes(q)) {
+                    item.style.display = '';
+                    visible++;
+                } else {
+                    item.style.display = 'none';
+                }
+            });
+
+            noRefResults.classList.toggle('d-none', visible > 0 || !q);
+        });
+    }
+</script>
+{% endblock %}
+
+{% block extra_css %}
+<style>
+    .ref-item:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 10px 25px rgba(0,0,0,0.1) !important;
+    }
+    .citation-card {
+        transition: transform 0.3s ease;
+    }
+    .citation-card:hover {
+        transform: translateY(-3px);
+    }
+</style>
+{% endblock %}

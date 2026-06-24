@@ -1,0 +1,214 @@
+{% extends 'base.html' %}
+
+{% block title %}Topshiriq Yuborish - Home Education{% endblock %}
+
+{% block content %}
+<section class="hero-section py-4">
+    <div class="container hero-content">
+        <nav aria-label="breadcrumb">
+            <ol class="breadcrumb">
+                <li class="breadcrumb-item"><a href="{% url 'index' %}" class="text-white-50">Bosh sahifa</a></li>
+                <li class="breadcrumb-item"><a href="{% url 'assignments' %}" class="text-white-50">Topshiriqlar</a></li>
+                <li class="breadcrumb-item text-white active">Yuborish</li>
+            </ol>
+        </nav>
+        <h1 class="display-5 fw-bold">Ish Yuborish</h1>
+        <p class="lead opacity-90">{{ assignment.title }}</p>
+    </div>
+</section>
+
+<section class="py-5">
+    <div class="container">
+        <div class="row g-4">
+            <!-- Assignment Info -->
+            <div class="col-lg-5" data-aos="fade-right">
+                <div class="card border-0 shadow-sm h-100" style="border-radius: 16px; overflow: hidden;">
+                    <div class="card-header text-white border-0 p-4"
+                        style="background: linear-gradient(135deg, #667eea, #764ba2);">
+                        <h5 class="mb-0"><i class="bi bi-info-circle me-2"></i>Topshiriq haqida</h5>
+                    </div>
+                    <div class="card-body p-4">
+                        <h4 class="fw-bold mb-3">{{ assignment.title }}</h4>
+                        <div class="mb-3">
+                            <span class="badge rounded-pill px-2 py-1"
+                                style="background: #667eea20; color: #667eea;">
+                                <i class="bi bi-journals"></i> {{ assignment.lesson.course.title }}
+                            </span>
+                        </div>
+                        <p class="text-muted mb-3">
+                            <i class="bi bi-book me-1"></i> Dars: {{ assignment.lesson.title }}
+                        </p>
+
+                        <div class="assignment-details">
+                            {{ assignment.description|safe }}
+                        </div>
+
+                        <hr>
+
+                        <div class="row g-2 text-center">
+                            <div class="col-6">
+                                <div class="p-3 rounded-3" style="background: #667eea15;">
+                                    <div class="fw-bold fs-4" style="color: #667eea;">{{ assignment.max_score }}</div>
+                                    <div class="small text-muted">Maks. ball</div>
+                                </div>
+                            </div>
+                            <div class="col-6">
+                                <div class="p-3 rounded-3" style="background: #11998e15;">
+                                    <div class="fw-bold fs-4" style="color: #11998e;">{{ assignment.deadline_days }}</div>
+                                    <div class="small text-muted">Kun muddat</div>
+                                </div>
+                            </div>
+                        </div>
+
+                        {% if assignment.task_file %}
+                        <div class="mt-4">
+                            <a href="{{ assignment.task_file.url }}" target="_blank"
+                                class="btn btn-outline-primary w-100 rounded-pill">
+                                <i class="bi bi-download me-2"></i>Topshiriq faylini yuklab olish
+                            </a>
+                        </div>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+
+            <!-- Upload Form -->
+            <div class="col-lg-7" data-aos="fade-left">
+                <div class="card border-0 shadow-sm" style="border-radius: 16px;">
+                    <div class="card-body p-4 p-lg-5">
+                        <h4 class="fw-bold mb-4"><i class="bi bi-upload text-primary me-2"></i>Ishni Yuborish</h4>
+
+                        <form method="post" enctype="multipart/form-data" id="submitForm">
+                            {% csrf_token %}
+
+                            <!-- File Upload Area -->
+                            <div class="mb-4">
+                                <label class="form-label fw-semibold">
+                                    Bajarilgan ish fayli <span class="text-danger">*</span>
+                                </label>
+                                <div class="upload-area border-2 border-dashed rounded-3 p-4 text-center"
+                                    id="uploadArea"
+                                    style="border-color: #667eea40; cursor: pointer; transition: all 0.3s;">
+                                    <div id="uploadPlaceholder">
+                                        <i class="bi bi-cloud-upload" style="font-size: 3rem; color: #667eea;"></i>
+                                        <p class="mb-1 fw-semibold mt-2">Faylni bu yerga tashlang yoki tanlang</p>
+                                        <p class="text-muted small mb-3">PDF, Word, ZIP, RAR — maks. 50MB</p>
+                                        <label for="submission_file" class="btn btn-primary rounded-pill px-4"
+                                            style="background: linear-gradient(135deg, #667eea, #764ba2); border: none;">
+                                            <i class="bi bi-folder2-open me-2"></i>Fayl tanlash
+                                        </label>
+                                    </div>
+                                    <div id="fileSelected" class="d-none">
+                                        <i class="bi bi-file-earmark-check" style="font-size: 3rem; color: #11998e;"></i>
+                                        <p class="mb-0 fw-semibold mt-2 text-success" id="fileName">Fayl tanlandi</p>
+                                        <button type="button" class="btn btn-sm btn-outline-danger mt-2" id="removeFile">
+                                            <i class="bi bi-x-circle me-1"></i>O'chirish
+                                        </button>
+                                    </div>
+                                </div>
+                                <input type="file" name="submission_file" id="submission_file" class="d-none"
+                                    accept=".pdf,.doc,.docx,.zip,.rar,.ppt,.pptx,.xlsx,.txt">
+                            </div>
+
+                            <!-- Comment -->
+                            <div class="mb-4">
+                                <label for="comment" class="form-label fw-semibold">
+                                    Izoh (ixtiyoriy)
+                                </label>
+                                <textarea name="comment" id="comment" rows="4" class="form-control"
+                                    style="border-radius: 12px; resize: none;"
+                                    placeholder="Ishingiz haqida qisqacha izoh qoldiring..."></textarea>
+                            </div>
+
+                            <!-- Warning -->
+                            <div class="alert border-0 rounded-3 mb-4"
+                                style="background: #fff3cd;">
+                                <i class="bi bi-exclamation-triangle-fill text-warning me-2"></i>
+                                <strong>Diqqat:</strong> Ish faqat bir marta yuborilishi mumkin. Yuborishdan oldin
+                                barcha ma'lumotlarni tekshiring.
+                            </div>
+
+                            <div class="d-grid gap-2 d-md-flex">
+                                <button type="submit" class="btn btn-primary btn-lg px-5 rounded-pill flex-fill"
+                                    style="background: linear-gradient(135deg, #667eea, #764ba2); border: none;">
+                                    <i class="bi bi-send-fill me-2"></i>Ishni Yuborish
+                                </button>
+                                <a href="{% url 'assignments' %}"
+                                    class="btn btn-outline-secondary btn-lg rounded-pill px-4">
+                                    <i class="bi bi-arrow-left me-2"></i>Orqaga
+                                </a>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    const fileInput = document.getElementById('submission_file');
+    const uploadArea = document.getElementById('uploadArea');
+    const uploadPlaceholder = document.getElementById('uploadPlaceholder');
+    const fileSelected = document.getElementById('fileSelected');
+    const fileName = document.getElementById('fileName');
+    const removeFile = document.getElementById('removeFile');
+
+    fileInput.addEventListener('change', function() {
+        if (this.files.length > 0) {
+            fileName.textContent = this.files[0].name;
+            uploadPlaceholder.classList.add('d-none');
+            fileSelected.classList.remove('d-none');
+            uploadArea.style.borderColor = '#11998e';
+            uploadArea.style.background = '#11998e10';
+        }
+    });
+
+    removeFile.addEventListener('click', function() {
+        fileInput.value = '';
+        uploadPlaceholder.classList.remove('d-none');
+        fileSelected.classList.add('d-none');
+        uploadArea.style.borderColor = '#667eea40';
+        uploadArea.style.background = '';
+    });
+
+    // Drag & Drop
+    uploadArea.addEventListener('dragover', (e) => {
+        e.preventDefault();
+        uploadArea.style.borderColor = '#667eea';
+        uploadArea.style.background = '#667eea10';
+    });
+
+    uploadArea.addEventListener('dragleave', () => {
+        uploadArea.style.borderColor = '#667eea40';
+        uploadArea.style.background = '';
+    });
+
+    uploadArea.addEventListener('drop', (e) => {
+        e.preventDefault();
+        const dt = e.dataTransfer;
+        if (dt.files.length > 0) {
+            fileInput.files = dt.files;
+            fileName.textContent = dt.files[0].name;
+            uploadPlaceholder.classList.add('d-none');
+            fileSelected.classList.remove('d-none');
+            uploadArea.style.borderColor = '#11998e';
+            uploadArea.style.background = '#11998e10';
+        }
+    });
+</script>
+{% endblock %}
+
+{% block extra_css %}
+<style>
+    .upload-area:hover {
+        border-color: #667eea !important;
+        background: #667eea08;
+    }
+    .border-dashed {
+        border-style: dashed !important;
+    }
+</style>
+{% endblock %}

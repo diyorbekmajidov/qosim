@@ -231,12 +231,6 @@
                             <i class="bi bi-house-door"></i> Bosh sahifa
                         </a>
                     </li>
-                    {% comment %} <li class="nav-item">
-                        <a class="nav-link {% if 'glossary' in request.path %}active{% endif %}"
-                            href="{% url 'glossary' %}">
-                            <i class="bi bi-book"></i> Glossary
-                        </a>
-                    </li> {% endcomment %}
                     <li class="nav-item">
                         <a class="nav-link {% if 'subject' in request.path %}active{% endif %}"
                             href="{% url 'subjects' %}">
@@ -250,16 +244,53 @@
                         </a>
                     </li>
                     <li class="nav-item">
-                        <a class="nav-link {% if 'contact' in request.path %}active{% endif %}"
-                            href="{% url 'contact' %}">
-                            <i class="bi bi-envelope"></i> Aloqa
+                        <a class="nav-link {% if 'games' in request.path %}active{% endif %}"
+                            href="{% url 'games' %}">
+                            <i class="bi bi-controller"></i> O'yinlar
                         </a>
                     </li>
+                    {% if user.is_authenticated %}
                     <li class="nav-item">
-                        <a class="nav-link {% if 'contact' in request.path %}active{% endif %}"
-                            href="https://www.canva.com/" target="_blank">
-                            <i class="bi bi-pencil"></i> Canva
+                        <a class="nav-link {% if 'assignments' in request.path %}active{% endif %}"
+                            href="{% url 'assignments' %}">
+                            <i class="bi bi-clipboard-check"></i> Topshiriqlar
                         </a>
+                    </li>
+                    {% endif %}
+                    <!-- Ko'proq dropdown -->
+                    <li class="nav-item dropdown">
+                        <a class="nav-link dropdown-toggle {% if 'glossary' in request.path or 'references' in request.path or 'about' in request.path or 'contact' in request.path %}active{% endif %}"
+                            href="#" id="moreDropdown" role="button" data-bs-toggle="dropdown">
+                            <i class="bi bi-three-dots"></i> Ko'proq
+                        </a>
+                        <ul class="dropdown-menu dropdown-menu-end">
+                            <li>
+                                <a class="dropdown-item" href="{% url 'glossary' %}">
+                                    <i class="bi bi-book text-primary"></i> Glossary
+                                </a>
+                            </li>
+                            <li>
+                                <a class="dropdown-item" href="{% url 'references' %}">
+                                    <i class="bi bi-bookmark-star text-success"></i> Adabiyotlar
+                                </a>
+                            </li>
+                            <li>
+                                <a class="dropdown-item" href="{% url 'about' %}">
+                                    <i class="bi bi-person-badge text-info"></i> Muallif haqida
+                                </a>
+                            </li>
+                            <li><hr class="dropdown-divider"></li>
+                            <li>
+                                <a class="dropdown-item" href="{% url 'contact' %}">
+                                    <i class="bi bi-envelope text-warning"></i> Aloqa
+                                </a>
+                            </li>
+                            <li>
+                                <a class="dropdown-item" href="https://www.canva.com/" target="_blank">
+                                    <i class="bi bi-pencil text-danger"></i> Canva
+                                </a>
+                            </li>
+                        </ul>
                     </li>
                     {% if user.is_authenticated %}
                     <li class="nav-item dropdown">
@@ -335,10 +366,13 @@
                     <h6 class="mb-3">Sahifalar</h6>
                     <ul class="list-unstyled">
                         <li class="mb-2"><a href="{% url 'index' %}">Bosh sahifa</a></li>
-                        <li class="mb-2"><a href="{% url 'glossary' %}">Glossary</a></li>
+                        <li class="mb-2"><a href="{% url 'subjects' %}">Fanlar</a></li>
                         <li class="mb-2"><a href="{% url 'courses' %}">Kurslar</a></li>
+                        <li class="mb-2"><a href="{% url 'games' %}">O'yinlar</a></li>
+                        <li class="mb-2"><a href="{% url 'glossary' %}">Glossary</a></li>
+                        <li class="mb-2"><a href="{% url 'references' %}">Adabiyotlar</a></li>
+                        <li class="mb-2"><a href="{% url 'about' %}">Muallif haqida</a></li>
                         <li class="mb-2"><a href="{% url 'contact' %}">Aloqa</a></li>
-                        <li class="mb-2"><a href="https://www.canva.com/" target="_blank">Canva</a></li>
                     </ul>
                 </div>
                 <div class="col-md-3 mb-4">

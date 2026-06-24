@@ -1,0 +1,169 @@
+{% extends 'base.html' %}
+
+{% block title %}Interaktiv O'yinlar - Home Education{% endblock %}
+
+{% block content %}
+<!-- Hero Section -->
+<section class="hero-section py-5">
+    <div class="container hero-content">
+        <div class="row">
+            <div class="col-lg-8 mx-auto text-center">
+                <div class="mb-3">
+                    <i class="bi bi-controller" style="font-size: 3rem; opacity: 0.9;"></i>
+                </div>
+                <h1 class="display-4 fw-bold mb-3">Interaktiv O'yinlar</h1>
+                <p class="lead">
+                    Raqamli media kompetentligingizni o'yinlar va testlar orqali sinang va oshiring!
+                </p>
+                <div class="d-flex justify-content-center gap-3 mt-4 flex-wrap">
+                    <span class="badge bg-white text-dark px-3 py-2 rounded-pill fs-6">
+                        <i class="bi bi-trophy text-warning"></i> {{ games|length }} ta o'yin
+                    </span>
+                    <span class="badge bg-white text-dark px-3 py-2 rounded-pill fs-6">
+                        <i class="bi bi-star text-warning"></i> Bepul
+                    </span>
+                    <span class="badge bg-white text-dark px-3 py-2 rounded-pill fs-6">
+                        <i class="bi bi-clock text-warning"></i> Istalgan vaqt
+                    </span>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Games Grid -->
+<section class="py-5">
+    <div class="container">
+        <div class="text-center mb-5">
+            <h2 class="section-title">O'yinlar va Testlar</h2>
+            <p class="text-muted mt-4">Bilimingizni interaktiv tarzda tekshiring</p>
+        </div>
+
+        <div class="row g-4">
+            {% for game in games %}
+            <div class="col-lg-6 col-xl-4" data-aos="fade-up" data-aos-delay="{{ forloop.counter0|add:100 }}">
+                <div class="game-card card h-100 border-0 shadow-sm" style="border-radius: 20px; overflow: hidden;">
+                    <!-- Card Header with gradient -->
+                    <div class="game-card-header p-4 text-white text-center position-relative"
+                        style="background: linear-gradient(135deg, {{ game.color }}, {{ game.color }}cc); min-height: 140px;">
+                        <div class="game-icon mb-3">
+                            <i class="{{ game.icon }}" style="font-size: 3.5rem; opacity: 0.95;"></i>
+                        </div>
+                        <span class="badge bg-white text-dark px-3 py-1 rounded-pill"
+                            style="font-size: 0.75rem; font-weight: 600;">
+                            {{ game.badge }}
+                        </span>
+                        <!-- Game number badge -->
+                        <div class="position-absolute top-0 start-0 m-3">
+                            <span class="badge rounded-circle p-2"
+                                style="background: rgba(255,255,255,0.25); width: 32px; height: 32px; display: flex; align-items: center; justify-content: center; font-size: 0.85rem;">
+                                {{ forloop.counter }}
+                            </span>
+                        </div>
+                    </div>
+
+                    <div class="card-body p-4">
+                        <div class="d-flex justify-content-between align-items-start mb-2">
+                            <h5 class="card-title fw-bold mb-0" style="font-size: 1.05rem;">{{ game.title }}</h5>
+                        </div>
+                        <div class="mb-3">
+                            <span class="badge rounded-pill px-2 py-1"
+                                style="background: {{ game.color }}20; color: {{ game.color }}; font-size: 0.75rem;">
+                                <i class="bi bi-bar-chart"></i> {{ game.level }}
+                            </span>
+                        </div>
+                        <p class="card-text text-muted" style="font-size: 0.9rem; line-height: 1.6;">
+                            {{ game.description }}
+                        </p>
+                    </div>
+
+                    <div class="card-footer bg-transparent border-0 p-4 pt-0">
+                        <a href="{{ game.url }}" target="_blank" class="btn btn-primary w-100 d-flex align-items-center justify-content-center gap-2"
+                            style="background: linear-gradient(135deg, {{ game.color }}, {{ game.color }}cc); border: none; border-radius: 12px; padding: 12px;">
+                            <i class="bi bi-play-circle-fill"></i>
+                            O'yinni boshlash
+                            <i class="bi bi-arrow-right-short"></i>
+                        </a>
+                    </div>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+</section>
+
+<!-- Info Section -->
+<section class="py-5 bg-light">
+    <div class="container">
+        <div class="row align-items-center">
+            <div class="col-lg-6" data-aos="fade-right">
+                <h3 class="fw-bold mb-3">Nima uchun interaktiv o'yinlar?</h3>
+                <p class="text-muted">
+                    Tadqiqotlar shuni ko'rsatadiki, o'yin asosida o'rganish an'anaviy usullarga nisbatan
+                    <strong>40% samarali</strong> bo'ladi. O'yinlar sizga bilimlarni
+                    qiziqarli va esda qolarli tarzda o'zlashtirishga yordam beradi.
+                </p>
+                <ul class="list-unstyled">
+                    <li class="mb-2"><i class="bi bi-check-circle-fill text-success me-2"></i> Interaktiv va qiziqarli format</li>
+                    <li class="mb-2"><i class="bi bi-check-circle-fill text-success me-2"></i> Darhol natija va fikr-mulohaza</li>
+                    <li class="mb-2"><i class="bi bi-check-circle-fill text-success me-2"></i> Istalgan qurilmadan foydalanish</li>
+                    <li class="mb-2"><i class="bi bi-check-circle-fill text-success me-2"></i> Bepul va cheksiz urinishlar</li>
+                </ul>
+            </div>
+            <div class="col-lg-6 text-center" data-aos="fade-left">
+                <div class="row g-3">
+                    <div class="col-6">
+                        <div class="stat-card p-4 rounded-3 text-white" style="background: linear-gradient(135deg, #667eea, #764ba2);">
+                            <div class="display-4 fw-bold">5</div>
+                            <div>O'yin</div>
+                        </div>
+                    </div>
+                    <div class="col-6">
+                        <div class="stat-card p-4 rounded-3 text-white" style="background: linear-gradient(135deg, #11998e, #38ef7d);">
+                            <div class="display-4 fw-bold">100%</div>
+                            <div>Bepul</div>
+                        </div>
+                    </div>
+                    <div class="col-6">
+                        <div class="stat-card p-4 rounded-3 text-white" style="background: linear-gradient(135deg, #f093fb, #f5576c);">
+                            <div class="display-4 fw-bold">∞</div>
+                            <div>Urinish</div>
+                        </div>
+                    </div>
+                    <div class="col-6">
+                        <div class="stat-card p-4 rounded-3 text-white" style="background: linear-gradient(135deg, #4facfe, #00f2fe);">
+                            <div class="display-4 fw-bold">24/7</div>
+                            <div>Mavjud</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+{% endblock %}
+
+{% block extra_css %}
+<style>
+    .game-card {
+        transition: all 0.3s ease;
+    }
+    .game-card:hover {
+        transform: translateY(-8px);
+        box-shadow: 0 20px 40px rgba(0,0,0,0.15) !important;
+    }
+    .game-card-header {
+        transition: all 0.3s ease;
+    }
+    .game-card:hover .game-icon i {
+        transform: scale(1.1);
+        transition: transform 0.3s ease;
+    }
+    .stat-card {
+        transition: transform 0.3s ease;
+    }
+    .stat-card:hover {
+        transform: translateY(-5px);
+    }
+</style>
+{% endblock %}
