@@ -325,6 +325,10 @@ class PracticalAssignment(models.Model):
         upload_to='assignments/tasks/', blank=True, null=True,
         verbose_name="Topshiriq fayli (PDF/Word/ZIP)"
     )
+    canva_url = models.URLField(
+        blank=True, null=True,
+        verbose_name="Canva havolasi (ixtiyoriy)"
+    )
     deadline_days = models.IntegerField(default=7, verbose_name="Muddat (kunlar)")
     max_score = models.IntegerField(default=100, verbose_name="Maksimal ball")
     is_active = models.BooleanField(default=True, verbose_name="Faol")
@@ -420,3 +424,75 @@ class Reference(models.Model):
 
     def __str__(self):
         return self.title
+
+
+# ========================
+# FINAL TEST (CHIQISH TESTI) MODELS
+# ========================
+class FinalTest(models.Model):
+    """Umumiy chiqish testi"""
+    title = models.CharField(max_length=200, verbose_name="Test nomi")
+    description = models.TextField(blank=True, verbose_name="Tavsif")
+    pass_score = models.IntegerField(default=60, verbose_name="O'tish balli (%)")
+    is_active = models.BooleanField(default=True, verbose_name="Faol")
+    order = models.IntegerField(default=0, verbose_name="Tartib")
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        ordering = ['order', '-created_at']
+        verbose_name = "Chiqish testi"
+        verbose_name_plural = "Chiqish testlari"
+
+    def __str__(self):
+        return self.title
+
+    def get_questions_count(self):
+        return self.questions.count()
+
+
+class FinalTestQuestion(models.Model):
+    """Chiqish testi savoli"""
+    test = models.ForeignKey(FinalTest, on_delete=models.CASCADE, related_name='questions')
+    question = models.TextField(verbose_name="Savol")
+    order = models.IntegerField(default=0, verbose_name="Tartib")
+
+    class Meta:
+        ordering = ['order']
+        verbose_name = "Savol"
+        verbose_name_plural = "Savollar"
+
+    def __str__(self):
+        return f"{self.test.title} - {self.question[:60]}"
+
+
+class FinalTestAnswer(models.Model):
+    """Chiqish testi javobi"""
+    question = models.ForeignKey(FinalTestQuestion, on_delete=models.CASCADE, related_name='answers')
+    text = models.CharField(max_length=500, verbose_name="Javob matni")
+    is_correct = models.BooleanField(default=False, verbose_name="To'g'ri javob")
+
+    class Meta:
+        verbose_name = "Javob"
+        verbose_name_plural = "Javoblar"
+
+    def __str__(self):
+        return f"{self.text[:50]} {'✓' if self.is_correct else '✗'}"
+
+
+class FinalTestResult(models.Model):
+    """Foydalanuvchi chiqish testi natijasi"""
+    test = models.ForeignKey(FinalTest, on_delete=models.CASCADE, related_name='results')
+    user = models.ForeignKey(User, on_delete=models.CASCADE, related_name='final_test_results')
+    score = models.IntegerField(default=0, verbose_name="Ball (%)")
+    correct = models.IntegerField(default=0, verbose_name="To'g'ri javoblar")
+    total = models.IntegerField(default=0, verbose_name="Jami savollar")
+    passed = models.BooleanField(default=False, verbose_name="O'tdi")
+    completed_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        ordering = ['-completed_at']
+        verbose_name = "Test natijasi"
+        verbose_name_plural = "Test natijalari"
+
+    def __str__(self):
+        return f"{self.user.username} - {self.test.title} - {self.score}%"

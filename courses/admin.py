@@ -3,7 +3,8 @@ from django.contrib.auth.admin import UserAdmin as BaseUserAdmin
 from .models import (
     User, Term, Category, Subject, Course, Lesson, Enrollment,
     LessonProgress, Quiz, QuizQuestion, QuizAnswer, Post,
-    PracticalAssignment, AssignmentSubmission, Reference
+    PracticalAssignment, AssignmentSubmission, Reference,
+    FinalTest, FinalTestQuestion, FinalTestAnswer, FinalTestResult
 )
 
 
@@ -150,7 +151,7 @@ class PracticalAssignmentAdmin(admin.ModelAdmin):
     inlines = [AssignmentSubmissionInline]
     fieldsets = (
         ('Asosiy ma\'lumotlar', {
-            'fields': ('lesson', 'title', 'description', 'task_file')
+            'fields': ('lesson', 'title', 'description', 'task_file', 'canva_url')
         }),
         ('Parametrlar', {
             'fields': ('max_score', 'deadline_days', 'is_active')
@@ -160,19 +161,40 @@ class PracticalAssignmentAdmin(admin.ModelAdmin):
 
 @admin.register(AssignmentSubmission)
 class AssignmentSubmissionAdmin(admin.ModelAdmin):
-    list_display = ['user', 'assignment', 'status', 'score', 'submitted_at']
+    list_display = ['user', 'assignment', 'status', 'score', 'submitted_at', 'download_file']
     list_filter = ['status', 'submitted_at']
     search_fields = ['user__username', 'assignment__title']
     list_editable = ['status', 'score']
-    readonly_fields = ['user', 'assignment', 'submission_file', 'comment', 'submitted_at']
+    readonly_fields = ['user', 'assignment', 'submission_file', 'comment', 'submitted_at', 'download_link']
     fieldsets = (
         ('Yuborilgan ish', {
-            'fields': ('user', 'assignment', 'submission_file', 'comment', 'submitted_at')
+            'fields': ('user', 'assignment', 'submission_file', 'download_link', 'comment', 'submitted_at')
         }),
         ('Baholash', {
             'fields': ('status', 'score', 'feedback')
         }),
     )
+
+    def download_file(self, obj):
+        from django.utils.html import format_html
+        if obj.submission_file:
+            return format_html(
+                '<a href="{}" download style="background:#0d6efd;color:white;padding:4px 10px;border-radius:4px;text-decoration:none;font-size:12px;">⬇ Yuklab olish</a>',
+                obj.submission_file.url
+            )
+        return '—'
+    download_file.short_description = 'Fayl'
+    download_file.allow_tags = True
+
+    def download_link(self, obj):
+        from django.utils.html import format_html
+        if obj.submission_file:
+            return format_html(
+                '<a href="{}" download class="button">⬇ Faylni yuklab olish</a>',
+                obj.submission_file.url
+            )
+        return 'Fayl yuklanmagan'
+    download_link.short_description = 'Faylni yuklab olish'
 
 
 @admin.register(Reference)
@@ -181,3 +203,54 @@ class ReferenceAdmin(admin.ModelAdmin):
     list_filter = ['category', 'is_active']
     search_fields = ['title', 'authors']
     list_editable = ['order', 'is_active', 'category']
+
+
+# ========================
+# FINAL TEST ADMIN
+# ========================
+class FinalTestAnswerInline(admin.TabularInline):
+    model = FinalTestAnswer
+    extra = 3
+    fields = ['text', 'is_correct']
+
+
+class FinalTestQuestionInline(admin.StackedInline):
+    model = FinalTestQuestion
+    extra = 1
+    ordering = ['order']
+    show_change_link = True
+
+
+@admin.register(FinalTest)
+class FinalTestAdmin(admin.ModelAdmin):
+    list_display = ['title', 'pass_score', 'get_questions_count', 'is_active', 'order', 'created_at']
+    list_filter = ['is_active']
+    search_fields = ['title', 'description']
+    list_editable = ['is_active', 'order']
+    inlines = [FinalTestQuestionInline]
+    fieldsets = (
+        ('Asosiy ma\'lumotlar', {
+            'fields': ('title', 'description', 'pass_score', 'order', 'is_active')
+        }),
+    )
+
+    def get_questions_count(self, obj):
+        return obj.questions.count()
+    get_questions_count.short_description = "Savollar soni"
+
+
+@admin.register(FinalTestQuestion)
+class FinalTestQuestionAdmin(admin.ModelAdmin):
+    list_display = ['question', 'test', 'order']
+    list_filter = ['test']
+    search_fields = ['question']
+    inlines = [FinalTestAnswerInline]
+    ordering = ['test', 'order']
+
+
+@admin.register(FinalTestResult)
+class FinalTestResultAdmin(admin.ModelAdmin):
+    list_display = ['user', 'test', 'score', 'correct', 'total', 'passed', 'completed_at']
+    list_filter = ['passed', 'test', 'completed_at']
+    search_fields = ['user__username', 'test__title']
+    readonly_fields = ['user', 'test', 'score', 'correct', 'total', 'passed', 'completed_at']

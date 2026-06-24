@@ -17,7 +17,8 @@ from rest_framework.authtoken.models import Token
 from .models import (
     Term, Subject, Course, Category, Lesson, Post, User,
     Enrollment, LessonProgress, Quiz, QuizQuestion, QuizAnswer,
-    PracticalAssignment, AssignmentSubmission, Reference
+    PracticalAssignment, AssignmentSubmission, Reference,
+    FinalTest, FinalTestQuestion, FinalTestAnswer, FinalTestResult
 )
 from .serializers import (
     TermSerializer, SubjectSerializer, CourseSerializer, CourseDetailSerializer,
@@ -369,52 +370,52 @@ def games_page(request):
     games = [
         {
             'id': 1,
-            'title': 'Raqamli savodxonlik testi',
-            'description': 'Raqamli savodxonlik darajangizni sinab ko\'ring. Savollar texnologiya, internet va media bilan bog\'liq.',
-            'url': 'https://digitalmediakompitentlik.wordpress.com/interaktiv-oyinlar/',
-            'icon': 'bi-laptop',
+            'title': 'Kompyuter qurilmalari',
+            'description': 'Kompyuter qurilmalarini tanib oling va ularning vazifalarini o\'rganing. Interaktiv o\'yin orqali bilimingizni sinab ko\'ring.',
+            'url': 'https://wordwall.net/resource/91028824/kompyuter-qurilmalari',
+            'icon': 'bi-pc-display',
             'color': '#667eea',
-            'badge': 'Test',
+            'badge': 'O\'yin',
             'level': 'Boshlang\'ich',
         },
         {
             'id': 2,
-            'title': 'Media kompetentlik o\'yini',
-            'description': 'Media savodxonligingizni oshiruvchi interaktiv o\'yin. Yangiliklar, reklamalar va ijtimoiy tarmoqlarni tahlil qiling.',
-            'url': 'https://digitalmediakompitentlik.wordpress.com/interaktiv-oyinlar/',
-            'icon': 'bi-newspaper',
+            'title': 'III Bob - Bilimni sinash',
+            'description': 'III bob bo\'yicha bilimlaringizni interaktiv o\'yin orqali mustahkamlang va sinab ko\'ring.',
+            'url': 'https://wordwall.net/resource/92431957/iii-bob',
+            'icon': 'bi-journal-check',
             'color': '#764ba2',
-            'badge': 'O\'yin',
-            'level': 'O\'rta',
-        },
-        {
-            'id': 3,
-            'title': 'Axborot xavfsizligi viktorinasi',
-            'description': 'Internet xavfsizligi, kibertahdidlar va shaxsiy ma\'lumotlarni himoya qilish bo\'yicha bilimingizni sinang.',
-            'url': 'https://digitalmediakompitentlik.wordpress.com/interaktiv-oyinlar/',
-            'icon': 'bi-shield-check',
-            'color': '#11998e',
             'badge': 'Viktorina',
             'level': 'O\'rta',
         },
         {
+            'id': 3,
+            'title': 'IV Bob - Interaktiv test',
+            'description': 'IV bob mavzulari bo\'yicha o\'zingizni sinab ko\'ring. Savollar qiziqarli va rivojlantiruvchi.',
+            'url': 'https://wordwall.net/ru/resource/92436431/iv-bob',
+            'icon': 'bi-shield-check',
+            'color': '#11998e',
+            'badge': 'Test',
+            'level': 'O\'rta',
+        },
+        {
             'id': 4,
-            'title': 'Fake news aniqlash o\'yini',
-            'description': 'Haqiqiy va yolg\'on yangiliklarni farqlashni o\'rganing. Kritik fikrlash ko\'nikmalaringizni rivojlantiring.',
-            'url': 'https://digitalmediakompitentlik.wordpress.com/interaktiv-oyinlar/',
-            'icon': 'bi-exclamation-triangle',
+            'title': '6-Bob - O\'yin topshiriqlari',
+            'description': '6-bob mavzulari asosida tuzilgan interaktiv topshiriqlar. Bilimingizni mustahkamlang.',
+            'url': 'https://wordwall.net/ru/resource/92439575/6-bob',
+            'icon': 'bi-puzzle',
             'color': '#f093fb',
-            'badge': 'Simulyatsiya',
+            'badge': 'Topshiriq',
             'level': 'Ilg\'or',
         },
         {
             'id': 5,
-            'title': 'Raqamli huquqlar testi',
-            'description': 'Onlayn muhitda huquq va majburiyatlaringizni, mualliflik huquqi asoslarini o\'rganing.',
-            'url': 'https://digitalmediakompitentlik.wordpress.com/interaktiv-oyinlar/',
-            'icon': 'bi-file-earmark-check',
+            'title': 'Kompyuter qurilmalari (Takrorlash)',
+            'description': 'Kompyuter qurilmalari mavzusini qayta ko\'rib chiqing va bilimlaringizni mustahkamlang.',
+            'url': 'https://wordwall.net/resource/91028824/kompyuter-qurilmalari',
+            'icon': 'bi-arrow-repeat',
             'color': '#4facfe',
-            'badge': 'Test',
+            'badge': 'Takrorlash',
             'level': 'Boshlang\'ich',
         },
     ]
@@ -520,6 +521,93 @@ def references_page(request):
         'total_count': references.count(),
     }
     return render(request, 'references.html', context)
+
+
+def final_test_list(request):
+    """Chiqish testlari ro'yxati"""
+    tests = FinalTest.objects.filter(is_active=True)
+
+    # Foydalanuvchi natijalari
+    user_results = {}
+    if request.user.is_authenticated:
+        for result in FinalTestResult.objects.filter(user=request.user):
+            # Har bir test uchun eng oxirgi natijani saqlash
+            if result.test_id not in user_results or result.completed_at > user_results[result.test_id].completed_at:
+                user_results[result.test_id] = result
+
+    tests_data = []
+    for test in tests:
+        tests_data.append({
+            'test': test,
+            'result': user_results.get(test.id),
+            'questions_count': test.get_questions_count(),
+        })
+
+    context = {'tests_data': tests_data}
+    return render(request, 'final_test_list.html', context)
+
+
+def final_test_detail(request, pk):
+    """Chiqish testini ishlash"""
+    test = get_object_or_404(FinalTest, pk=pk, is_active=True)
+    questions = test.questions.prefetch_related('answers').all()
+
+    if request.method == 'POST' and request.user.is_authenticated:
+        total = questions.count()
+        correct = 0
+        results = []
+
+        for question in questions:
+            answer_id = request.POST.get(f'question_{question.pk}')
+            correct_answer = question.answers.filter(is_correct=True).first()
+            user_answer = None
+            is_correct = False
+
+            if answer_id:
+                try:
+                    user_answer = question.answers.get(pk=int(answer_id))
+                    is_correct = user_answer.is_correct
+                    if is_correct:
+                        correct += 1
+                except FinalTestAnswer.DoesNotExist:
+                    pass
+
+            results.append({
+                'question': question,
+                'user_answer': user_answer,
+                'correct_answer': correct_answer,
+                'is_correct': is_correct,
+            })
+
+        score = int((correct / total) * 100) if total > 0 else 0
+        passed = score >= test.pass_score
+
+        # Natijani saqlash
+        result_obj = FinalTestResult.objects.create(
+            test=test,
+            user=request.user,
+            score=score,
+            correct=correct,
+            total=total,
+            passed=passed,
+        )
+
+        context = {
+            'test': test,
+            'results': results,
+            'score': score,
+            'correct': correct,
+            'total': total,
+            'passed': passed,
+            'result': result_obj,
+        }
+        return render(request, 'final_test_result.html', context)
+
+    context = {
+        'test': test,
+        'questions': questions,
+    }
+    return render(request, 'final_test_detail.html', context)
 
 
 # ========================

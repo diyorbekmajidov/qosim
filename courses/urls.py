@@ -48,6 +48,8 @@ urlpatterns = [
     path('assignments/', views.assignments_page, name='assignments'),
     path('assignment/<int:pk>/submit/', views.submit_assignment, name='submit_assignment'),
     path('references/', views.references_page, name='references'),
+    path('final-tests/', views.final_test_list, name='final_test_list'),
+    path('final-test/<int:pk>/', views.final_test_detail, name='final_test_detail'),
 
     # ========================
     # API URLS
