@@ -438,12 +438,10 @@ def about_page(request):
 @login_required
 def assignments_page(request):
     """Amaliy mashg'ulotlar ro'yxati"""
-    # Foydalanuvchi yozilgan kurslardagi darslarning topshiriqlari
-    enrolled_course_ids = request.user.enrollments.values_list('course_id', flat=True)
+    # Barcha aktiv topshiriqlarni ko'rsatish (enrollment tekshiruvisiz)
     assignments = PracticalAssignment.objects.filter(
-        lesson__course_id__in=enrolled_course_ids,
         is_active=True
-    ).select_related('lesson', 'lesson__course')
+    ).select_related('lesson', 'lesson__course').order_by('lesson__course__order', 'lesson__order')
 
     # Foydalanuvchining submission'larini olish
     my_submissions = {}
