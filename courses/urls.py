@@ -41,6 +41,15 @@ urlpatterns = [
     path('profile/', views.profile_page, name='profile'),
 
     # ========================
+    # NEW SECTIONS
+    # ========================
+    path('games/', views.games_page, name='games'),
+    path('about/', views.about_page, name='about'),
+    path('assignments/', views.assignments_page, name='assignments'),
+    path('assignment/<int:pk>/submit/', views.submit_assignment, name='submit_assignment'),
+    path('references/', views.references_page, name='references'),
+
+    # ========================
     # API URLS
     # ========================
     path('api/', include(router.urls)),

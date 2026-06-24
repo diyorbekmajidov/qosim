@@ -308,3 +308,115 @@ class Post(models.Model):
     
     def __str__(self):
         return self.title
+
+
+# ========================
+# PRACTICAL ASSIGNMENT MODELS
+# ========================
+class PracticalAssignment(models.Model):
+    """Amaliy mashg'ulot - darsga biriktirilgan topshiriq"""
+    lesson = models.OneToOneField(
+        Lesson, on_delete=models.CASCADE, related_name='assignment',
+        verbose_name="Dars"
+    )
+    title = models.CharField(max_length=200, verbose_name="Topshiriq nomi")
+    description = RichTextField(verbose_name="Topshiriq mazmuni", config_name='default')
+    task_file = models.FileField(
+        upload_to='assignments/tasks/', blank=True, null=True,
+        verbose_name="Topshiriq fayli (PDF/Word/ZIP)"
+    )
+    deadline_days = models.IntegerField(default=7, verbose_name="Muddat (kunlar)")
+    max_score = models.IntegerField(default=100, verbose_name="Maksimal ball")
+    is_active = models.BooleanField(default=True, verbose_name="Faol")
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        verbose_name = "Amaliy topshiriq"
+        verbose_name_plural = "Amaliy topshiriqlar"
+
+    def __str__(self):
+        return f"{self.lesson.title} - {self.title}"
+
+
+class AssignmentSubmission(models.Model):
+    """Foydalanuvchi yuborgan amaliy ish"""
+    STATUS_CHOICES = [
+        ('submitted', 'Yuborildi'),
+        ('reviewed', 'Ko\'rib chiqildi'),
+        ('accepted', 'Qabul qilindi'),
+        ('rejected', 'Qaytarildi'),
+    ]
+
+    assignment = models.ForeignKey(
+        PracticalAssignment, on_delete=models.CASCADE,
+        related_name='submissions', verbose_name="Topshiriq"
+    )
+    user = models.ForeignKey(
+        User, on_delete=models.CASCADE,
+        related_name='submissions', verbose_name="Foydalanuvchi"
+    )
+    submission_file = models.FileField(
+        upload_to='assignments/submissions/',
+        verbose_name="Bajarilgan ish fayli"
+    )
+    comment = models.TextField(blank=True, verbose_name="Izoh")
+    status = models.CharField(
+        max_length=20, choices=STATUS_CHOICES,
+        default='submitted', verbose_name="Holat"
+    )
+    score = models.IntegerField(null=True, blank=True, verbose_name="Ball")
+    feedback = models.TextField(blank=True, verbose_name="O'qituvchi izohi")
+    submitted_at = models.DateTimeField(auto_now_add=True)
+    reviewed_at = models.DateTimeField(null=True, blank=True)
+
+    class Meta:
+        unique_together = ['assignment', 'user']
+        verbose_name = "Yuborilgan ish"
+        verbose_name_plural = "Yuborilgan ishlar"
+        ordering = ['-submitted_at']
+
+    def __str__(self):
+        return f"{self.user.username} - {self.assignment.title}"
+
+    def get_status_badge(self):
+        badges = {
+            'submitted': 'warning',
+            'reviewed': 'info',
+            'accepted': 'success',
+            'rejected': 'danger',
+        }
+        return badges.get(self.status, 'secondary')
+
+
+# ========================
+# REFERENCE MODEL
+# ========================
+class Reference(models.Model):
+    """Foydalanilgan adabiyotlar"""
+    CATEGORY_CHOICES = [
+        ('book', 'Kitob'),
+        ('article', 'Maqola'),
+        ('website', 'Veb-sayt'),
+        ('video', 'Video'),
+        ('other', 'Boshqa'),
+    ]
+
+    title = models.CharField(max_length=300, verbose_name="Sarlavha")
+    authors = models.CharField(max_length=300, blank=True, verbose_name="Mualliflar")
+    year = models.CharField(max_length=10, blank=True, verbose_name="Yil")
+    publisher = models.CharField(max_length=200, blank=True, verbose_name="Nashriyot")
+    url = models.URLField(blank=True, null=True, verbose_name="URL manzil")
+    category = models.CharField(
+        max_length=20, choices=CATEGORY_CHOICES,
+        default='book', verbose_name="Tur"
+    )
+    order = models.IntegerField(default=0, verbose_name="Tartib")
+    is_active = models.BooleanField(default=True, verbose_name="Faol")
+
+    class Meta:
+        ordering = ['order', 'title']
+        verbose_name = "Adabiyot"
+        verbose_name_plural = "Foydalanilgan adabiyotlar"
+
+    def __str__(self):
+        return self.title

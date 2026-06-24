@@ -1,10 +1,9 @@
-# courses/admin.py
-
 from django.contrib import admin
 from django.contrib.auth.admin import UserAdmin as BaseUserAdmin
 from .models import (
     User, Term, Category, Subject, Course, Lesson, Enrollment,
-    LessonProgress, Quiz, QuizQuestion, QuizAnswer, Post
+    LessonProgress, Quiz, QuizQuestion, QuizAnswer, Post,
+    PracticalAssignment, AssignmentSubmission, Reference
 )
 
 
@@ -133,3 +132,52 @@ class PostAdmin(admin.ModelAdmin):
     list_filter = ['is_published', 'created_at']
     search_fields = ['title', 'content']
     prepopulated_fields = {'slug': ('title',)}
+
+
+class AssignmentSubmissionInline(admin.TabularInline):
+    model = AssignmentSubmission
+    extra = 0
+    readonly_fields = ['user', 'submission_file', 'comment', 'submitted_at']
+    fields = ['user', 'submission_file', 'status', 'score', 'feedback', 'submitted_at']
+
+
+@admin.register(PracticalAssignment)
+class PracticalAssignmentAdmin(admin.ModelAdmin):
+    list_display = ['title', 'lesson', 'max_score', 'deadline_days', 'is_active', 'created_at']
+    list_filter = ['is_active', 'created_at']
+    search_fields = ['title', 'description']
+    list_editable = ['is_active']
+    inlines = [AssignmentSubmissionInline]
+    fieldsets = (
+        ('Asosiy ma\'lumotlar', {
+            'fields': ('lesson', 'title', 'description', 'task_file')
+        }),
+        ('Parametrlar', {
+            'fields': ('max_score', 'deadline_days', 'is_active')
+        }),
+    )
+
+
+@admin.register(AssignmentSubmission)
+class AssignmentSubmissionAdmin(admin.ModelAdmin):
+    list_display = ['user', 'assignment', 'status', 'score', 'submitted_at']
+    list_filter = ['status', 'submitted_at']
+    search_fields = ['user__username', 'assignment__title']
+    list_editable = ['status', 'score']
+    readonly_fields = ['user', 'assignment', 'submission_file', 'comment', 'submitted_at']
+    fieldsets = (
+        ('Yuborilgan ish', {
+            'fields': ('user', 'assignment', 'submission_file', 'comment', 'submitted_at')
+        }),
+        ('Baholash', {
+            'fields': ('status', 'score', 'feedback')
+        }),
+    )
+
+
+@admin.register(Reference)
+class ReferenceAdmin(admin.ModelAdmin):
+    list_display = ['title', 'authors', 'year', 'category', 'order', 'is_active']
+    list_filter = ['category', 'is_active']
+    search_fields = ['title', 'authors']
+    list_editable = ['order', 'is_active', 'category']

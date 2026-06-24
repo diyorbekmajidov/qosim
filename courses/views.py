@@ -16,7 +16,8 @@ from rest_framework.authtoken.models import Token
 
 from .models import (
     Term, Subject, Course, Category, Lesson, Post, User,
-    Enrollment, LessonProgress, Quiz, QuizQuestion, QuizAnswer
+    Enrollment, LessonProgress, Quiz, QuizQuestion, QuizAnswer,
+    PracticalAssignment, AssignmentSubmission, Reference
 )
 from .serializers import (
     TermSerializer, SubjectSerializer, CourseSerializer, CourseDetailSerializer,
@@ -357,6 +358,168 @@ def handler404(request, exception):
 
 def handler500(request):
     return render(request, '500.html', status=500)
+
+
+# ========================
+# NEW SECTION VIEWS
+# ========================
+
+def games_page(request):
+    """Interaktiv o'yinlar sahifasi"""
+    games = [
+        {
+            'id': 1,
+            'title': 'Raqamli savodxonlik testi',
+            'description': 'Raqamli savodxonlik darajangizni sinab ko\'ring. Savollar texnologiya, internet va media bilan bog\'liq.',
+            'url': 'https://digitalmediakompitentlik.wordpress.com/interaktiv-oyinlar/',
+            'icon': 'bi-laptop',
+            'color': '#667eea',
+            'badge': 'Test',
+            'level': 'Boshlang\'ich',
+        },
+        {
+            'id': 2,
+            'title': 'Media kompetentlik o\'yini',
+            'description': 'Media savodxonligingizni oshiruvchi interaktiv o\'yin. Yangiliklar, reklamalar va ijtimoiy tarmoqlarni tahlil qiling.',
+            'url': 'https://digitalmediakompitentlik.wordpress.com/interaktiv-oyinlar/',
+            'icon': 'bi-newspaper',
+            'color': '#764ba2',
+            'badge': 'O\'yin',
+            'level': 'O\'rta',
+        },
+        {
+            'id': 3,
+            'title': 'Axborot xavfsizligi viktorinasi',
+            'description': 'Internet xavfsizligi, kibertahdidlar va shaxsiy ma\'lumotlarni himoya qilish bo\'yicha bilimingizni sinang.',
+            'url': 'https://digitalmediakompitentlik.wordpress.com/interaktiv-oyinlar/',
+            'icon': 'bi-shield-check',
+            'color': '#11998e',
+            'badge': 'Viktorina',
+            'level': 'O\'rta',
+        },
+        {
+            'id': 4,
+            'title': 'Fake news aniqlash o\'yini',
+            'description': 'Haqiqiy va yolg\'on yangiliklarni farqlashni o\'rganing. Kritik fikrlash ko\'nikmalaringizni rivojlantiring.',
+            'url': 'https://digitalmediakompitentlik.wordpress.com/interaktiv-oyinlar/',
+            'icon': 'bi-exclamation-triangle',
+            'color': '#f093fb',
+            'badge': 'Simulyatsiya',
+            'level': 'Ilg\'or',
+        },
+        {
+            'id': 5,
+            'title': 'Raqamli huquqlar testi',
+            'description': 'Onlayn muhitda huquq va majburiyatlaringizni, mualliflik huquqi asoslarini o\'rganing.',
+            'url': 'https://digitalmediakompitentlik.wordpress.com/interaktiv-oyinlar/',
+            'icon': 'bi-file-earmark-check',
+            'color': '#4facfe',
+            'badge': 'Test',
+            'level': 'Boshlang\'ich',
+        },
+    ]
+    return render(request, 'games.html', {'games': games})
+
+
+def about_page(request):
+    """Muallif haqida sahifasi"""
+    topics = [
+        "Media savodxonligi",
+        "Raqamli kompetentlik",
+        "Axborot xavfsizligi",
+        "Onlayn ta'lim texnologiyalari",
+        "Kiberhavfsizlik asoslari",
+        "Fake news va dezinformatsiya",
+    ]
+    return render(request, 'about.html', {'topics': topics})
+
+
+@login_required
+def assignments_page(request):
+    """Amaliy mashg'ulotlar ro'yxati"""
+    # Foydalanuvchi yozilgan kurslardagi darslarning topshiriqlari
+    enrolled_course_ids = request.user.enrollments.values_list('course_id', flat=True)
+    assignments = PracticalAssignment.objects.filter(
+        lesson__course_id__in=enrolled_course_ids,
+        is_active=True
+    ).select_related('lesson', 'lesson__course')
+
+    # Foydalanuvchining submission'larini olish
+    my_submissions = {}
+    for sub in AssignmentSubmission.objects.filter(user=request.user):
+        my_submissions[sub.assignment_id] = sub
+
+    assignments_data = []
+    for assignment in assignments:
+        assignments_data.append({
+            'assignment': assignment,
+            'submission': my_submissions.get(assignment.id),
+        })
+
+    context = {
+        'assignments_data': assignments_data,
+    }
+    return render(request, 'assignments.html', context)
+
+
+@login_required
+def submit_assignment(request, pk):
+    """Amaliy mashg'ulot ishini yuborish"""
+    assignment = get_object_or_404(PracticalAssignment, pk=pk, is_active=True)
+
+    # Allaqachon yuborilganmi?
+    existing_submission = AssignmentSubmission.objects.filter(
+        assignment=assignment, user=request.user
+    ).first()
+
+    if existing_submission:
+        messages.warning(request, 'Siz bu topshiriqqa allaqachon ish yuborgansiz!')
+        return redirect('assignments')
+
+    if request.method == 'POST':
+        submission_file = request.FILES.get('submission_file')
+        comment = request.POST.get('comment', '')
+
+        if not submission_file:
+            messages.error(request, 'Iltimos, fayl yuklang!')
+            return render(request, 'assignment_submit.html', {'assignment': assignment})
+
+        submission = AssignmentSubmission.objects.create(
+            assignment=assignment,
+            user=request.user,
+            submission_file=submission_file,
+            comment=comment,
+        )
+        messages.success(request, 'Ishingiz muvaffaqiyatli yuborildi! O\'qituvchi ko\'rib chiqadi.')
+        return redirect('assignments')
+
+    return render(request, 'assignment_submit.html', {'assignment': assignment})
+
+
+def references_page(request):
+    """Foydalanilgan adabiyotlar sahifasi"""
+    references = Reference.objects.filter(is_active=True)
+    # Kategoriyalar bo'yicha guruhlash
+    categories = {
+        'book': {'label': 'Kitoblar', 'icon': 'bi-book', 'items': [], 'color': '#667eea'},
+        'article': {'label': 'Maqolalar', 'icon': 'bi-file-text', 'items': [], 'color': '#764ba2'},
+        'website': {'label': 'Veb-saytlar', 'icon': 'bi-globe', 'items': [], 'color': '#11998e'},
+        'video': {'label': 'Videolar', 'icon': 'bi-play-circle', 'items': [], 'color': '#f093fb'},
+        'other': {'label': 'Boshqalar', 'icon': 'bi-collection', 'items': [], 'color': '#4facfe'},
+    }
+    for ref in references:
+        if ref.category in categories:
+            categories[ref.category]['items'].append(ref)
+
+    # Bo'sh kategoriyalarni olib tashlash
+    active_categories = {k: v for k, v in categories.items() if v['items']}
+
+    context = {
+        'references': references,
+        'categories': active_categories,
+        'total_count': references.count(),
+    }
+    return render(request, 'references.html', context)
 
 
 # ========================
