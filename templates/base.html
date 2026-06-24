@@ -256,6 +256,12 @@
                             <i class="bi bi-clipboard-check"></i> Topshiriqlar
                         </a>
                     </li>
+                    <li class="nav-item">
+                        <a class="nav-link {% if 'final-test' in request.path %}active{% endif %}"
+                            href="{% url 'final_test_list' %}">
+                            <i class="bi bi-patch-check-fill"></i> Chiqish testi
+                        </a>
+                    </li>
                     {% endif %}
                     <!-- Ko'proq dropdown -->
                     <li class="nav-item dropdown">

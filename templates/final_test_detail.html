@@ -1,0 +1,222 @@
+{% extends 'base.html' %}
+
+{% block title %}{{ test.title }} - Chiqish Testi{% endblock %}
+
+{% block content %}
+<section class="hero-section py-4">
+    <div class="container hero-content">
+        <nav aria-label="breadcrumb">
+            <ol class="breadcrumb">
+                <li class="breadcrumb-item"><a href="{% url 'index' %}" class="text-white-50">Bosh sahifa</a></li>
+                <li class="breadcrumb-item"><a href="{% url 'final_test_list' %}" class="text-white-50">Chiqish testlari</a></li>
+                <li class="breadcrumb-item text-white active">{{ test.title }}</li>
+            </ol>
+        </nav>
+        <div class="d-flex align-items-center gap-3">
+            <div style="width: 60px; height: 60px; background: rgba(255,255,255,0.2); border-radius: 50%; display: flex; align-items: center; justify-content: center; flex-shrink: 0;">
+                <i class="bi bi-patch-check-fill fs-3"></i>
+            </div>
+            <div>
+                <h1 class="display-6 fw-bold mb-1">{{ test.title }}</h1>
+                <p class="lead opacity-85 mb-0">
+                    <i class="bi bi-question-circle me-1"></i>{{ questions|length }} ta savol &nbsp;|&nbsp;
+                    <i class="bi bi-bullseye me-1"></i>O'tish: {{ test.pass_score }}%
+                </p>
+            </div>
+        </div>
+    </div>
+</section>
+
+<section class="py-5">
+    <div class="container">
+        {% if user.is_authenticated %}
+        <form method="post" id="finalTestForm">
+            {% csrf_token %}
+            <div class="row g-4">
+                <!-- Questions -->
+                <div class="col-lg-8">
+                    {% for question in questions %}
+                    <div class="card border-0 shadow-sm mb-4" style="border-radius: 16px;" data-aos="fade-up" data-aos-delay="{{ forloop.counter0|add:50 }}">
+                        <div class="card-body p-4">
+                            <div class="d-flex align-items-start gap-3 mb-3">
+                                <div class="question-num flex-shrink-0"
+                                    style="width: 40px; height: 40px; background: linear-gradient(135deg, #667eea, #764ba2); border-radius: 50%; display: flex; align-items: center; justify-content: center; color: white; font-weight: bold; font-size: 0.9rem;">
+                                    {{ forloop.counter }}
+                                </div>
+                                <p class="fw-semibold mb-0" style="font-size: 1.05rem; line-height: 1.5;">{{ question.question }}</p>
+                            </div>
+
+                            <div class="ps-5">
+                                {% for answer in question.answers.all %}
+                                <label class="answer-label d-flex align-items-center gap-3 p-3 mb-2 rounded-3 cursor-pointer"
+                                    style="border: 2px solid #e9ecef; transition: all 0.2s; cursor: pointer;"
+                                    for="q{{ question.pk }}_a{{ answer.pk }}">
+                                    <input type="radio"
+                                        name="question_{{ question.pk }}"
+                                        id="q{{ question.pk }}_a{{ answer.pk }}"
+                                        value="{{ answer.pk }}"
+                                        class="form-check-input m-0"
+                                        style="width: 20px; height: 20px; flex-shrink: 0;"
+                                        required>
+                                    <span>{{ answer.text }}</span>
+                                </label>
+                                {% endfor %}
+                            </div>
+                        </div>
+                    </div>
+                    {% endfor %}
+
+                    <!-- Submit button -->
+                    <div class="d-grid gap-2 d-md-flex mt-4">
+                        <button type="submit" class="btn btn-primary btn-lg px-5 rounded-pill flex-fill"
+                            style="background: linear-gradient(135deg, #667eea, #764ba2); border: none;"
+                            id="submitBtn">
+                            <i class="bi bi-send-fill me-2"></i>Testni yakunlash
+                        </button>
+                        <a href="{% url 'final_test_list' %}" class="btn btn-outline-secondary btn-lg rounded-pill px-4">
+                            <i class="bi bi-arrow-left me-2"></i>Orqaga
+                        </a>
+                    </div>
+                </div>
+
+                <!-- Sidebar -->
+                <div class="col-lg-4">
+                    <div class="sticky-top" style="top: 80px;">
+                        <!-- Progress tracker -->
+                        <div class="card border-0 shadow-sm mb-4" style="border-radius: 16px;">
+                            <div class="card-body p-4">
+                                <h6 class="fw-bold mb-3">
+                                    <i class="bi bi-list-check me-2" style="color: #667eea;"></i>
+                                    Savollar holati
+                                </h6>
+                                <div class="d-flex flex-wrap gap-2 mb-3" id="questionTracker">
+                                    {% for question in questions %}
+                                    <a href="#" class="tracker-btn"
+                                        data-qid="{{ question.pk }}"
+                                        style="width: 36px; height: 36px; background: #e9ecef; border-radius: 8px; display: flex; align-items: center; justify-content: center; text-decoration: none; color: #6c757d; font-weight: 600; font-size: 0.85rem; transition: all 0.2s;">
+                                        {{ forloop.counter }}
+                                    </a>
+                                    {% endfor %}
+                                </div>
+                                <div class="progress rounded-pill" style="height: 8px;">
+                                    <div class="progress-bar" id="progressBar" role="progressbar"
+                                        style="width: 0%; background: linear-gradient(135deg, #667eea, #764ba2);">
+                                    </div>
+                                </div>
+                                <div class="text-center mt-2 small text-muted">
+                                    <span id="answeredCount">0</span> / {{ questions|length }} javob berildi
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Info card -->
+                        <div class="card border-0 shadow-sm" style="border-radius: 16px; overflow: hidden;">
+                            <div class="card-header border-0 p-3 text-white"
+                                style="background: linear-gradient(135deg, #11998e, #38ef7d);">
+                                <h6 class="mb-0 fw-bold">
+                                    <i class="bi bi-info-circle me-2"></i>Test haqida
+                                </h6>
+                            </div>
+                            <div class="card-body p-3">
+                                <ul class="list-unstyled mb-0" style="font-size: 0.9rem;">
+                                    <li class="mb-2 d-flex align-items-center gap-2">
+                                        <i class="bi bi-question-circle text-primary"></i>
+                                        <span>{{ questions|length }} ta savol</span>
+                                    </li>
+                                    <li class="mb-2 d-flex align-items-center gap-2">
+                                        <i class="bi bi-bullseye text-success"></i>
+                                        <span>O'tish chegarasi: <strong>{{ test.pass_score }}%</strong></span>
+                                    </li>
+                                    <li class="d-flex align-items-center gap-2">
+                                        <i class="bi bi-exclamation-triangle text-warning"></i>
+                                        <span>Har bir savolga javob bering</span>
+                                    </li>
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </form>
+
+        {% else %}
+        <div class="text-center py-5">
+            <i class="bi bi-lock-fill" style="font-size: 4rem; color: #667eea;"></i>
+            <h3 class="mt-3 fw-bold">Kirish kerak</h3>
+            <p class="text-muted mb-4">Testni topshirish uchun tizimga kiring.</p>
+            <a href="{% url 'login' %}?next={{ request.path }}" class="btn btn-primary btn-lg rounded-pill px-5">
+                <i class="bi bi-box-arrow-in-right me-2"></i>Kirish
+            </a>
+        </div>
+        {% endif %}
+    </div>
+</section>
+{% endblock %}
+
+{% block extra_css %}
+<style>
+    .answer-label:hover {
+        border-color: #667eea !important;
+        background: #667eea08;
+    }
+    .answer-label.selected {
+        border-color: #667eea !important;
+        background: #667eea12;
+    }
+    .tracker-btn.answered {
+        background: linear-gradient(135deg, #667eea, #764ba2) !important;
+        color: white !important;
+    }
+</style>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    const totalQuestions = {{ questions|length }};
+    let answeredQuestions = new Set();
+
+    // Answer selection styling
+    document.querySelectorAll('input[type="radio"]').forEach(radio => {
+        radio.addEventListener('change', function() {
+            const qid = this.name.replace('question_', '');
+            // Remove selected from siblings
+            document.querySelectorAll(`input[name="${this.name}"]`).forEach(r => {
+                r.closest('.answer-label').classList.remove('selected');
+            });
+            // Add selected to current
+            this.closest('.answer-label').classList.add('selected');
+            // Update tracker
+            answeredQuestions.add(qid);
+            updateProgress();
+            // Update tracker button
+            const btn = document.querySelector(`.tracker-btn[data-qid="${qid}"]`);
+            if (btn) btn.classList.add('answered');
+        });
+    });
+
+    function updateProgress() {
+        const count = answeredQuestions.size;
+        document.getElementById('answeredCount').textContent = count;
+        document.getElementById('progressBar').style.width = (count / totalQuestions * 100) + '%';
+    }
+
+    // Scroll to question on tracker click
+    document.querySelectorAll('.tracker-btn').forEach(btn => {
+        btn.addEventListener('click', function(e) {
+            e.preventDefault();
+            const qid = this.dataset.qid;
+            const questionCard = document.querySelector(`input[name="question_${qid}"]`).closest('.card');
+            questionCard.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        });
+    });
+
+    // Submit validation
+    document.getElementById('finalTestForm').addEventListener('submit', function(e) {
+        if (answeredQuestions.size < totalQuestions) {
+            e.preventDefault();
+            const unanswered = totalQuestions - answeredQuestions.size;
+            alert(`Iltimos, barcha savollarga javob bering. Hali ${unanswered} ta savol javobsiz!`);
+        }
+    });
+</script>
+{% endblock %}

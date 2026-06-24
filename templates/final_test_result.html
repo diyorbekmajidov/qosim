@@ -1,0 +1,170 @@
+{% extends 'base.html' %}
+
+{% block title %}Test Natijasi - {{ test.title }}{% endblock %}
+
+{% block content %}
+<section class="hero-section py-5">
+    <div class="container hero-content">
+        <div class="col-lg-8 mx-auto text-center">
+            {% if passed %}
+            <div class="result-icon mb-3">
+                <i class="bi bi-trophy-fill" style="font-size: 4rem; color: #FFD700; filter: drop-shadow(0 4px 12px rgba(255,215,0,0.5));"></i>
+            </div>
+            <h1 class="display-4 fw-bold mb-2">Tabriklaymiz! 🎉</h1>
+            <p class="lead opacity-90">Siz chiqish testidan muvaffaqiyatli o'tdingiz!</p>
+            {% else %}
+            <div class="result-icon mb-3">
+                <i class="bi bi-emoji-neutral-fill" style="font-size: 4rem; opacity: 0.9;"></i>
+            </div>
+            <h1 class="display-4 fw-bold mb-2">Harakat qiling!</h1>
+            <p class="lead opacity-90">Siz testdan o'ta olmadingiz. Yana bir bor urinib ko'ring!</p>
+            {% endif %}
+        </div>
+    </div>
+</section>
+
+<section class="py-5">
+    <div class="container">
+        <!-- Score Card -->
+        <div class="row justify-content-center mb-5">
+            <div class="col-lg-8">
+                <div class="card border-0 shadow" style="border-radius: 20px; overflow: hidden;" data-aos="zoom-in">
+                    <!-- Score Header -->
+                    <div class="p-5 text-white text-center"
+                        style="background: linear-gradient(135deg, {% if passed %}#11998e, #38ef7d{% else %}#f093fb, #f5576c{% endif %});">
+                        <div class="score-circle mx-auto mb-4"
+                            style="width: 150px; height: 150px; background: rgba(255,255,255,0.2); border-radius: 50%; display: flex; flex-direction: column; align-items: center; justify-content: center; border: 4px solid rgba(255,255,255,0.5);">
+                            <div class="display-3 fw-bold">{{ score }}</div>
+                            <div class="fs-5 opacity-85">ball%</div>
+                        </div>
+                        <h4 class="fw-bold mb-1">{{ test.title }}</h4>
+                        {% if passed %}
+                        <span class="badge bg-white text-success px-4 py-2 fs-6 rounded-pill">
+                            <i class="bi bi-check-circle-fill me-1"></i> O'tdi ✓
+                        </span>
+                        {% else %}
+                        <span class="badge bg-white text-danger px-4 py-2 fs-6 rounded-pill">
+                            <i class="bi bi-x-circle-fill me-1"></i> O'ta olmadi
+                        </span>
+                        {% endif %}
+                    </div>
+
+                    <!-- Stats -->
+                    <div class="card-body p-0">
+                        <div class="row g-0 text-center">
+                            <div class="col-4 p-4" style="border-right: 1px solid #f0f0f0;">
+                                <div class="fw-bold fs-3 text-success">{{ correct }}</div>
+                                <div class="small text-muted">To'g'ri</div>
+                            </div>
+                            <div class="col-4 p-4" style="border-right: 1px solid #f0f0f0;">
+                                <div class="fw-bold fs-3 text-danger">{{ total|add:"-"|add:correct }}</div>
+                                <div class="small text-muted">Noto'g'ri</div>
+                            </div>
+                            <div class="col-4 p-4">
+                                <div class="fw-bold fs-3" style="color: #667eea;">{{ total }}</div>
+                                <div class="small text-muted">Jami</div>
+                            </div>
+                        </div>
+                        <div class="p-4">
+                            <div class="d-flex justify-content-between align-items-center mb-2">
+                                <span class="small text-muted">Natija</span>
+                                <span class="small fw-bold">{{ score }}% / {{ test.pass_score }}% kerak</span>
+                            </div>
+                            <div class="progress rounded-pill" style="height: 12px;">
+                                <div class="progress-bar progress-bar-striped progress-bar-animated"
+                                    role="progressbar"
+                                    style="width: {{ score }}%; background: linear-gradient(135deg, {% if passed %}#11998e, #38ef7d{% else %}#f093fb, #f5576c{% endif %});">
+                                </div>
+                            </div>
+                            <!-- Pass mark indicator -->
+                            <div class="position-relative mt-1">
+                                <div style="position: absolute; left: {{ test.pass_score }}%; transform: translateX(-50%);">
+                                    <div style="width: 2px; height: 8px; background: #dc3545; margin: 0 auto;"></div>
+                                    <div class="small text-danger fw-bold" style="font-size: 0.7rem; white-space: nowrap; transform: translateX(-50%);">{{ test.pass_score }}%</div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Actions -->
+                    <div class="card-footer bg-transparent border-0 p-4">
+                        <div class="d-flex flex-wrap gap-2 justify-content-center">
+                            <a href="{% url 'final_test_detail' test.id %}"
+                                class="btn btn-primary rounded-pill px-4"
+                                style="background: linear-gradient(135deg, #667eea, #764ba2); border: none;">
+                                <i class="bi bi-arrow-repeat me-2"></i>Qayta topshirish
+                            </a>
+                            <a href="{% url 'final_test_list' %}"
+                                class="btn btn-outline-secondary rounded-pill px-4">
+                                <i class="bi bi-list-check me-2"></i>Testlar ro'yxati
+                            </a>
+                            <a href="{% url 'index' %}"
+                                class="btn btn-outline-primary rounded-pill px-4">
+                                <i class="bi bi-house me-2"></i>Bosh sahifa
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Detailed Results -->
+        <div class="row justify-content-center">
+            <div class="col-lg-8">
+                <h4 class="fw-bold mb-4">
+                    <i class="bi bi-clipboard-data me-2" style="color: #667eea;"></i>
+                    Batafsil natijalar
+                </h4>
+                {% for item in results %}
+                <div class="card border-0 shadow-sm mb-3" style="border-radius: 14px; overflow: hidden;" data-aos="fade-up" data-aos-delay="{{ forloop.counter0|add:50 }}">
+                    <div class="card-body p-0">
+                        <!-- Question header -->
+                        <div class="p-3 d-flex align-items-center gap-3"
+                            style="background: {% if item.is_correct %}#11998e12{% else %}#f5576c12{% endif %}; border-left: 4px solid {% if item.is_correct %}#11998e{% else %}#f5576c{% endif %};">
+                            <div class="flex-shrink-0" style="width: 36px; height: 36px; background: {% if item.is_correct %}#11998e{% else %}#f5576c{% endif %}; border-radius: 50%; display: flex; align-items: center; justify-content: center;">
+                                <i class="bi bi-{% if item.is_correct %}check{% else %}x{% endif %}-lg text-white fw-bold"></i>
+                            </div>
+                            <p class="mb-0 fw-semibold">{{ forloop.counter }}. {{ item.question.question }}</p>
+                        </div>
+                        <!-- Answers -->
+                        <div class="p-3 ps-4">
+                            {% if not item.is_correct and item.user_answer %}
+                            <div class="d-flex align-items-center gap-2 mb-2">
+                                <i class="bi bi-x-circle-fill text-danger"></i>
+                                <span class="text-muted small">Sizning javobingiz:</span>
+                                <span class="text-danger small fw-semibold">{{ item.user_answer.text }}</span>
+                            </div>
+                            {% endif %}
+                            <div class="d-flex align-items-center gap-2">
+                                <i class="bi bi-check-circle-fill text-success"></i>
+                                <span class="text-muted small">To'g'ri javob:</span>
+                                <span class="text-success small fw-semibold">{{ item.correct_answer.text }}</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+    </div>
+</section>
+{% endblock %}
+
+{% block extra_css %}
+<style>
+    .score-circle {
+        animation: pulse 2s ease-in-out infinite;
+    }
+    @keyframes pulse {
+        0%, 100% { transform: scale(1); }
+        50% { transform: scale(1.03); }
+    }
+    .result-icon {
+        animation: bounce 1s ease-in-out;
+    }
+    @keyframes bounce {
+        0%, 100% { transform: translateY(0); }
+        50% { transform: translateY(-15px); }
+    }
+</style>
+{% endblock %}
