@@ -161,11 +161,11 @@ CKEDITOR_CONFIGS = {
 
 # Jazzmin Settings
 JAZZMIN_SETTINGS = {
-    "site_title": "Home Education Admin",
-    "site_header": "Home Education",
-    "site_brand": "Home Education",
+    "site_title": "Multimodal resurs yaratish platformasi Admin",
+    "site_header": "Multimodal resurs yaratish platformasi",
+    "site_brand": "Multimodal resurs yaratish platformasi",
     "welcome_sign": "Xush kelibsiz!",
-    "copyright": "Home Education",
+    "copyright": "Multimodal resurs yaratish platformasi",
     "search_model": "courses.User",
     "topmenu_links": [
         {"name": "Bosh sahifa", "url": "admin:index"},
@@ -184,10 +184,13 @@ JAZZMIN_SETTINGS = {
         "courses.Lesson": "fas fa-chalkboard-teacher",
         "courses.Enrollment": "fas fa-user-check",
         "courses.Post": "fas fa-newspaper",
+        "courses.AboutPage": "fas fa-user-tie",
+        "courses.Term": "fas fa-book"
     },
 }
 
 # Messages
+# pyrefly: ignore [missing-import]
 from django.contrib.messages import constants as messages
 MESSAGE_TAGS = {
     messages.DEBUG: 'debug',
