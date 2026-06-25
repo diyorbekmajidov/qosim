@@ -1,7 +1,7 @@
 from django.contrib import admin
 from django.contrib.auth.admin import UserAdmin as BaseUserAdmin
 from .models import (
-    User, Term, Category, Subject, Course, Lesson, Enrollment,
+    User, Term, AboutPage, Category, Subject, Course, Lesson, Enrollment,
     LessonProgress, Quiz, QuizQuestion, QuizAnswer, Post,
     PracticalAssignment, AssignmentSubmission, Reference,
     FinalTest, FinalTestQuestion, FinalTestAnswer, FinalTestResult
@@ -16,13 +16,50 @@ class UserAdmin(BaseUserAdmin):
     )
 
 
-# @admin.register(Term)
-# class TermAdmin(admin.ModelAdmin):
-#     list_display = ['title', 'order', 'is_active', 'created_at']
-#     list_filter = ['is_active', 'created_at']
-#     search_fields = ['title', 'description']
-#     list_editable = ['order', 'is_active']
+@admin.register(Term)
+class TermAdmin(admin.ModelAdmin):
+    list_display = ['title', 'order', 'is_active', 'created_at']
+    list_filter = ['is_active', 'created_at']
+    search_fields = ['title', 'description']
+    list_editable = ['order', 'is_active']
 
+
+@admin.register(AboutPage)
+class AboutPageAdmin(admin.ModelAdmin):
+    fieldsets = (
+        ('Asosiy ma\'lumotlar', {
+            'fields': ('full_name', 'position', 'bio_short', 'photo')
+        }),
+        ('Statistika', {
+            'fields': ('experience_years', 'students_count', 'publications_count', 'courses_count')
+        }),
+        ('Biografiya', {
+            'fields': ('education_text', 'career_text', 'science_text', 'online_text'),
+            'classes': ('collapse',),
+        }),
+        ('Ko\'nikmalar', {
+            'fields': (
+                'skill1_name', 'skill1_percent',
+                'skill2_name', 'skill2_percent',
+                'skill3_name', 'skill3_percent',
+                'skill4_name', 'skill4_percent',
+            ),
+            'classes': ('collapse',),
+        }),
+        ('Bog\'lanish', {
+            'fields': ('email', 'phone', 'address')
+        }),
+        ('Tadqiqot yo\'nalishlari', {
+            'fields': ('research_topics',)
+        }),
+    )
+
+    def has_add_permission(self, request):
+        # Faqat bitta yozuv bo'lishi uchun — allaqachon bor bo'lsa qo'shishga ruxsat yo'q
+        return not AboutPage.objects.exists()
+
+    def has_delete_permission(self, request, obj=None):
+        return False
 
 @admin.register(Subject)
 class SubjectAdmin(admin.ModelAdmin):

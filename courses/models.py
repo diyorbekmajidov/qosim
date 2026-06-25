@@ -45,9 +45,75 @@ class Term(models.Model):
 
 
 # ========================
+# ABOUT PAGE MODEL (Muallif haqida)
+# ========================
+class AboutPage(models.Model):
+    """Muallif haqida sahifasi — faqat bitta yozuv bo'lishi kerak"""
+    full_name = models.CharField(max_length=200, verbose_name="To'liq ism", default="Muallif")
+    position = models.CharField(max_length=300, verbose_name="Lavozim/Mutaxassislik",
+                                default="Raqamli va Axborot Texnologiyalari sohasidagi o'qituvchi")
+    bio_short = models.TextField(verbose_name="Qisqa tarjimai hol (hero)",
+                                 default="Raqamli media kompetentligi sohasida tajribali pedagog va tadqiqotchi.")
+    photo = models.ImageField(upload_to='about/', blank=True, null=True, verbose_name="Rasm")
+
+    # Statistika
+    experience_years = models.CharField(max_length=20, default="10+", verbose_name="Tajriba yillari")
+    students_count = models.CharField(max_length=20, default="500+", verbose_name="O'quvchilar")
+    publications_count = models.CharField(max_length=20, default="20+", verbose_name="Nashrlar")
+    courses_count = models.CharField(max_length=20, default="15+", verbose_name="Kurslar")
+
+    # Biografiya (CKEditor matn)
+    education_text = RichTextField(verbose_name="Ta'lim", config_name='default', blank=True)
+    career_text = RichTextField(verbose_name="Kasbiy faoliyat", config_name='default', blank=True)
+    science_text = RichTextField(verbose_name="Ilmiy faoliyat", config_name='default', blank=True)
+    online_text = RichTextField(verbose_name="Onlayn faoliyat", config_name='default', blank=True)
+
+    # Ko'nikmalar
+    skill1_name = models.CharField(max_length=100, default="Raqamli media savodxonligi", verbose_name="1-ko'nikma")
+    skill1_percent = models.IntegerField(default=95, verbose_name="1-ko'nikma %")
+    skill2_name = models.CharField(max_length=100, default="Axborot texnologiyalari", verbose_name="2-ko'nikma")
+    skill2_percent = models.IntegerField(default=90, verbose_name="2-ko'nikma %")
+    skill3_name = models.CharField(max_length=100, default="Pedagogika va metodika", verbose_name="3-ko'nikma")
+    skill3_percent = models.IntegerField(default=92, verbose_name="3-ko'nikma %")
+    skill4_name = models.CharField(max_length=100, default="Kiberhavfsizlik", verbose_name="4-ko'nikma")
+    skill4_percent = models.IntegerField(default=80, verbose_name="4-ko'nikma %")
+
+    # Bog'lanish
+    email = models.EmailField(blank=True, default="info@mediacomp.uz", verbose_name="Email")
+    phone = models.CharField(max_length=30, blank=True, default="+998 97 911 44 59", verbose_name="Telefon")
+    address = models.CharField(max_length=200, blank=True, default="Samarqand, O'zbekiston", verbose_name="Manzil")
+
+    # Tadqiqot yo'nalishlari (har birini yangi qatorga)
+    research_topics = models.TextField(
+        verbose_name="Tadqiqot yo'nalishlari (har birini yangi qatorga yozing)",
+        default="Media savodxonligi\nRaqamli kompetentlik\nAxborot xavfsizligi\nOnlayn ta'lim texnologiyalari\nKiberhavfsizlik asoslari\nFake news va dezinformatsiya"
+    )
+
+    class Meta:
+        verbose_name = "Muallif haqida (sahifa)"
+        verbose_name_plural = "Muallif haqida (sahifa)"
+
+    def __str__(self):
+        return f"Muallif haqida — {self.full_name}"
+
+    def get_research_topics_list(self):
+        return [t.strip() for t in self.research_topics.splitlines() if t.strip()]
+
+    def save(self, *args, **kwargs):
+        self.pk = 1  # Singleton
+        super().save(*args, **kwargs)
+
+    @classmethod
+    def get_instance(cls):
+        obj, _ = cls.objects.get_or_create(pk=1)
+        return obj
+
+
+# ========================
 # SUBJECT MODEL (FAN)
 # ========================
 class Subject(models.Model):
+
     """Fan - Matematika, Fizika, Informatika va h.k."""
     name = models.CharField(max_length=200, verbose_name="Fan nomi")
     slug = models.SlugField(unique=True, verbose_name="Slug")

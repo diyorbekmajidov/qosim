@@ -18,7 +18,8 @@ from .models import (
     Term, Subject, Course, Category, Lesson, Post, User,
     Enrollment, LessonProgress, Quiz, QuizQuestion, QuizAnswer,
     PracticalAssignment, AssignmentSubmission, Reference,
-    FinalTest, FinalTestQuestion, FinalTestAnswer, FinalTestResult
+    FinalTest, FinalTestQuestion, FinalTestAnswer, FinalTestResult,
+    AboutPage
 )
 from .serializers import (
     TermSerializer, SubjectSerializer, CourseSerializer, CourseDetailSerializer,
@@ -380,8 +381,8 @@ def games_page(request):
         },
         {
             'id': 2,
-            'title': 'III Bob - Bilimni sinash',
-            'description': 'III bob bo\'yicha bilimlaringizni interaktiv o\'yin orqali mustahkamlang va sinab ko\'ring.',
+            'title': 'Bilimni sinash',
+            'description': 'Bilimlaringizni interaktiv o\'yin orqali mustahkamlang va sinab ko\'ring.',
             'url': 'https://wordwall.net/resource/92431957/iii-bob',
             'icon': 'bi-journal-check',
             'color': '#764ba2',
@@ -390,8 +391,8 @@ def games_page(request):
         },
         {
             'id': 3,
-            'title': 'IV Bob - Interaktiv test',
-            'description': 'IV bob mavzulari bo\'yicha o\'zingizni sinab ko\'ring. Savollar qiziqarli va rivojlantiruvchi.',
+            'title': 'Interaktiv test',
+            'description': 'Mavzular bo\'yicha o\'zingizni sinab ko\'ring. Savollar qiziqarli va rivojlantiruvchi.',
             'url': 'https://wordwall.net/ru/resource/92436431/iv-bob',
             'icon': 'bi-shield-check',
             'color': '#11998e',
@@ -400,8 +401,8 @@ def games_page(request):
         },
         {
             'id': 4,
-            'title': '6-Bob - O\'yin topshiriqlari',
-            'description': '6-bob mavzulari asosida tuzilgan interaktiv topshiriqlar. Bilimingizni mustahkamlang.',
+            'title': 'O\'yin topshiriqlari',
+            'description': 'Mavzular asosida tuzilgan interaktiv topshiriqlar. Bilimingizni mustahkamlang.',
             'url': 'https://wordwall.net/ru/resource/92439575/6-bob',
             'icon': 'bi-puzzle',
             'color': '#f093fb',
@@ -423,16 +424,10 @@ def games_page(request):
 
 
 def about_page(request):
-    """Muallif haqida sahifasi"""
-    topics = [
-        "Media savodxonligi",
-        "Raqamli kompetentlik",
-        "Axborot xavfsizligi",
-        "Onlayn ta'lim texnologiyalari",
-        "Kiberhavfsizlik asoslari",
-        "Fake news va dezinformatsiya",
-    ]
-    return render(request, 'about.html', {'topics': topics})
+    """Muallif haqida sahifasi — AboutPage modelidan ma'lumot oladi"""
+    about = AboutPage.get_instance()
+    topics = about.get_research_topics_list()
+    return render(request, 'about.html', {'about': about, 'topics': topics})
 
 
 @login_required
