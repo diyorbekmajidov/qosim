@@ -1,6 +1,6 @@
 {% extends 'base.html' %}
 
-{% block title %}Muallif Haqida - Home Education{% endblock %}
+{% block title %}Muallif Haqida - Multimodal resurs yaratish platformasi{% endblock %}
 
 {% block content %}
 <!-- Hero Section -->
@@ -9,9 +9,16 @@
         <div class="row align-items-center">
             <div class="col-lg-4 text-center mb-4 mb-lg-0" data-aos="fade-right">
                 <div class="author-avatar-wrapper mx-auto">
+                    {% if about.photo %}
+                    <div class="author-avatar-circle mx-auto mb-3" style="overflow: hidden; padding: 0;">
+                        <img src="{{ about.photo.url }}" alt="{{ about.full_name }}"
+                            style="width: 100%; height: 100%; object-fit: cover; border-radius: 50%;">
+                    </div>
+                    {% else %}
                     <div class="author-avatar-circle mx-auto mb-3">
                         <i class="bi bi-person-fill" style="font-size: 5rem; color: rgba(255,255,255,0.9);"></i>
                     </div>
+                    {% endif %}
                     <div class="author-badges mt-3">
                         <span class="badge bg-white text-dark px-3 py-2 m-1 rounded-pill">
                             <i class="bi bi-award text-warning"></i> Pedagog
@@ -23,14 +30,11 @@
                 </div>
             </div>
             <div class="col-lg-8" data-aos="fade-left">
-                <h1 class="display-4 fw-bold mb-2">Muallif Haqida</h1>
-                <h4 class="mb-3" style="opacity: 0.9;">Raqamli va Axborot Texnologiyalari sohasidagi o'qituvchi</h4>
-                <p class="lead mb-4">
-                    Raqamli media kompetentligi va axborot texnologiyalari sohasida 10+ yillik tajribaga ega bo'lgan
-                    pedagog va tadqiqotchi. Media savodxonligi va raqamli ko'nikmalar rivojlantirishga ixtisoslashgan.
-                </p>
+                <h1 class="display-4 fw-bold mb-2">{{ about.full_name }}</h1>
+                <h4 class="mb-3" style="opacity: 0.9;">{{ about.position }}</h4>
+                <p class="lead mb-4">{{ about.bio_short }}</p>
                 <div class="d-flex flex-wrap gap-3">
-                    <a href="mailto:info@mediacomp.uz" class="btn btn-light btn-lg rounded-pill">
+                    <a href="mailto:{{ about.email }}" class="btn btn-light btn-lg rounded-pill">
                         <i class="bi bi-envelope-fill me-2"></i>Bog'lanish
                     </a>
                     <a href="{% url 'contact' %}" class="btn btn-outline-light btn-lg rounded-pill">
@@ -48,25 +52,25 @@
         <div class="row g-3 text-center">
             <div class="col-6 col-md-3" data-aos="fade-up" data-aos-delay="100">
                 <div class="stat-box p-3 rounded-3 bg-white shadow-sm">
-                    <div class="stat-number display-5 fw-bold" style="color: #667eea;">10+</div>
+                    <div class="stat-number display-5 fw-bold" style="color: #667eea;">{{ about.experience_years }}</div>
                     <div class="text-muted small">Yillik tajriba</div>
                 </div>
             </div>
             <div class="col-6 col-md-3" data-aos="fade-up" data-aos-delay="200">
                 <div class="stat-box p-3 rounded-3 bg-white shadow-sm">
-                    <div class="stat-number display-5 fw-bold" style="color: #764ba2;">500+</div>
+                    <div class="stat-number display-5 fw-bold" style="color: #764ba2;">{{ about.students_count }}</div>
                     <div class="text-muted small">O'quvchilar</div>
                 </div>
             </div>
             <div class="col-6 col-md-3" data-aos="fade-up" data-aos-delay="300">
                 <div class="stat-box p-3 rounded-3 bg-white shadow-sm">
-                    <div class="stat-number display-5 fw-bold" style="color: #11998e;">20+</div>
+                    <div class="stat-number display-5 fw-bold" style="color: #11998e;">{{ about.publications_count }}</div>
                     <div class="text-muted small">Nashr etilgan ishlar</div>
                 </div>
             </div>
             <div class="col-6 col-md-3" data-aos="fade-up" data-aos-delay="400">
                 <div class="stat-box p-3 rounded-3 bg-white shadow-sm">
-                    <div class="stat-number display-5 fw-bold" style="color: #f093fb;">15+</div>
+                    <div class="stat-number display-5 fw-bold" style="color: #f093fb;">{{ about.courses_count }}</div>
                     <div class="text-muted small">Kurslar</div>
                 </div>
             </div>
@@ -91,10 +95,11 @@
                         </div>
                         <div>
                             <h5 class="fw-bold mb-1">Ta'lim</h5>
-                            <p class="text-muted mb-0">
-                                Informatika va axborot texnologiyalari yo'nalishi bo'yicha oliy ma'lumotli.
-                                Media kompetentlik sohasida maxsus kurslar va treninglar tugallangan.
-                            </p>
+                            {% if about.education_text %}
+                            <div class="text-muted">{{ about.education_text|safe }}</div>
+                            {% else %}
+                            <p class="text-muted mb-0">Informatika va axborot texnologiyalari yo'nalishi bo'yicha oliy ma'lumotli.</p>
+                            {% endif %}
                         </div>
                     </div>
 
@@ -106,10 +111,11 @@
                         </div>
                         <div>
                             <h5 class="fw-bold mb-1">Kasbiy faoliyat</h5>
-                            <p class="text-muted mb-0">
-                                Oliy ta'lim muassasasida raqamli texnologiyalar va media savodxonligi fanlarini
-                                o'qitish. Onlayn kurslar yaratish va talabalar bilan ishlash.
-                            </p>
+                            {% if about.career_text %}
+                            <div class="text-muted">{{ about.career_text|safe }}</div>
+                            {% else %}
+                            <p class="text-muted mb-0">Oliy ta'lim muassasasida raqamli texnologiyalar va media savodxonligi fanlarini o'qitish.</p>
+                            {% endif %}
                         </div>
                     </div>
 
@@ -121,10 +127,11 @@
                         </div>
                         <div>
                             <h5 class="fw-bold mb-1">Ilmiy faoliyat</h5>
-                            <p class="text-muted mb-0">
-                                Media savodxonligi va raqamli kompetentlik sohasida maqolalar va monografiyalar
-                                muallifi. Xalqaro konferensiyalarda ishtirok etgan.
-                            </p>
+                            {% if about.science_text %}
+                            <div class="text-muted">{{ about.science_text|safe }}</div>
+                            {% else %}
+                            <p class="text-muted mb-0">Media savodxonligi va raqamli kompetentlik sohasida maqolalar va monografiyalar muallifi.</p>
+                            {% endif %}
                         </div>
                     </div>
 
@@ -136,10 +143,11 @@
                         </div>
                         <div>
                             <h5 class="fw-bold mb-1">Onlayn faoliyat</h5>
-                            <p class="text-muted mb-0">
-                                Raqamli media kompetentligi platformasi yaratuvchisi. O'zbek tilida sifatli
-                                ta'lim materiallarini tayyorlash va tarqatish.
-                            </p>
+                            {% if about.online_text %}
+                            <div class="text-muted">{{ about.online_text|safe }}</div>
+                            {% else %}
+                            <p class="text-muted mb-0">Multimodal resurs yaratish platformasi yaratuvchisi. O'zbek tilida sifatli ta'lim materiallarini tayyorlash.</p>
+                            {% endif %}
                         </div>
                     </div>
                 </div>
@@ -152,48 +160,48 @@
                 <div class="skills mb-4">
                     <div class="skill-item mb-4">
                         <div class="d-flex justify-content-between mb-1">
-                            <span class="fw-semibold">Raqamli media savodxonligi</span>
-                            <span class="text-muted">95%</span>
+                            <span class="fw-semibold">{{ about.skill1_name }}</span>
+                            <span class="text-muted">{{ about.skill1_percent }}%</span>
                         </div>
                         <div class="progress" style="height: 8px; border-radius: 4px;">
                             <div class="progress-bar"
-                                style="width: 95%; background: linear-gradient(135deg, #667eea, #764ba2); border-radius: 4px;">
+                                style="width: {{ about.skill1_percent }}%; background: linear-gradient(135deg, #667eea, #764ba2); border-radius: 4px;">
                             </div>
                         </div>
                     </div>
 
                     <div class="skill-item mb-4">
                         <div class="d-flex justify-content-between mb-1">
-                            <span class="fw-semibold">Axborot texnologiyalari</span>
-                            <span class="text-muted">90%</span>
+                            <span class="fw-semibold">{{ about.skill2_name }}</span>
+                            <span class="text-muted">{{ about.skill2_percent }}%</span>
                         </div>
                         <div class="progress" style="height: 8px; border-radius: 4px;">
                             <div class="progress-bar"
-                                style="width: 90%; background: linear-gradient(135deg, #11998e, #38ef7d); border-radius: 4px;">
+                                style="width: {{ about.skill2_percent }}%; background: linear-gradient(135deg, #11998e, #38ef7d); border-radius: 4px;">
                             </div>
                         </div>
                     </div>
 
                     <div class="skill-item mb-4">
                         <div class="d-flex justify-content-between mb-1">
-                            <span class="fw-semibold">Pedagogika va metodika</span>
-                            <span class="text-muted">92%</span>
+                            <span class="fw-semibold">{{ about.skill3_name }}</span>
+                            <span class="text-muted">{{ about.skill3_percent }}%</span>
                         </div>
                         <div class="progress" style="height: 8px; border-radius: 4px;">
                             <div class="progress-bar"
-                                style="width: 92%; background: linear-gradient(135deg, #f093fb, #f5576c); border-radius: 4px;">
+                                style="width: {{ about.skill3_percent }}%; background: linear-gradient(135deg, #f093fb, #f5576c); border-radius: 4px;">
                             </div>
                         </div>
                     </div>
 
                     <div class="skill-item mb-4">
                         <div class="d-flex justify-content-between mb-1">
-                            <span class="fw-semibold">Kiberhavfsizlik</span>
-                            <span class="text-muted">80%</span>
+                            <span class="fw-semibold">{{ about.skill4_name }}</span>
+                            <span class="text-muted">{{ about.skill4_percent }}%</span>
                         </div>
                         <div class="progress" style="height: 8px; border-radius: 4px;">
                             <div class="progress-bar"
-                                style="width: 80%; background: linear-gradient(135deg, #4facfe, #00f2fe); border-radius: 4px;">
+                                style="width: {{ about.skill4_percent }}%; background: linear-gradient(135deg, #4facfe, #00f2fe); border-radius: 4px;">
                             </div>
                         </div>
                     </div>
@@ -208,8 +216,8 @@
                             <i class="bi bi-envelope-fill me-3" style="font-size: 1.2rem; opacity: 0.8;"></i>
                             <div>
                                 <div class="small" style="opacity: 0.7;">Elektron pochta</div>
-                                <a href="mailto:info@mediacomp.uz" class="text-white text-decoration-none fw-semibold">
-                                    info@mediacomp.uz
+                                <a href="mailto:{{ about.email }}" class="text-white text-decoration-none fw-semibold">
+                                    {{ about.email }}
                                 </a>
                             </div>
                         </li>
@@ -217,8 +225,8 @@
                             <i class="bi bi-telephone-fill me-3" style="font-size: 1.2rem; opacity: 0.8;"></i>
                             <div>
                                 <div class="small" style="opacity: 0.7;">Telefon</div>
-                                <a href="tel:+998979114459" class="text-white text-decoration-none fw-semibold">
-                                    +998 97 911 44 59
+                                <a href="tel:{{ about.phone }}" class="text-white text-decoration-none fw-semibold">
+                                    {{ about.phone }}
                                 </a>
                             </div>
                         </li>
@@ -226,7 +234,7 @@
                             <i class="bi bi-geo-alt-fill me-3" style="font-size: 1.2rem; opacity: 0.8;"></i>
                             <div>
                                 <div class="small" style="opacity: 0.7;">Manzil</div>
-                                <span class="fw-semibold">Samarqand, O'zbekiston</span>
+                                <span class="fw-semibold">{{ about.address }}</span>
                             </div>
                         </li>
                     </ul>
