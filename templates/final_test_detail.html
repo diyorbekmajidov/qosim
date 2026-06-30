@@ -3,22 +3,22 @@
 {% block title %}{{ test.title }} - Chiqish Testi{% endblock %}
 
 {% block content %}
-<section class="hero-section py-4">
+<section class="hero-section py-3">
     <div class="container hero-content">
         <nav aria-label="breadcrumb">
-            <ol class="breadcrumb">
+            <ol class="breadcrumb mb-2">
                 <li class="breadcrumb-item"><a href="{% url 'index' %}" class="text-white-50">Bosh sahifa</a></li>
                 <li class="breadcrumb-item"><a href="{% url 'final_test_list' %}" class="text-white-50">Chiqish testlari</a></li>
                 <li class="breadcrumb-item text-white active">{{ test.title }}</li>
             </ol>
         </nav>
         <div class="d-flex align-items-center gap-3">
-            <div style="width: 60px; height: 60px; background: rgba(255,255,255,0.2); border-radius: 50%; display: flex; align-items: center; justify-content: center; flex-shrink: 0;">
-                <i class="bi bi-patch-check-fill fs-3"></i>
+            <div style="width: 48px; height: 48px; background: rgba(255,255,255,0.2); border-radius: 50%; display: flex; align-items: center; justify-content: center; flex-shrink: 0;">
+                <i class="bi bi-patch-check-fill fs-4"></i>
             </div>
             <div>
-                <h1 class="display-6 fw-bold mb-1">{{ test.title }}</h1>
-                <p class="lead opacity-85 mb-0">
+                <h1 class="h4 fw-bold mb-0">{{ test.title }}</h1>
+                <p class="small opacity-85 mb-0">
                     <i class="bi bi-question-circle me-1"></i>{{ questions|length }} ta savol &nbsp;|&nbsp;
                     <i class="bi bi-bullseye me-1"></i>O'tish: {{ test.pass_score }}%
                 </p>
@@ -36,29 +36,23 @@
                 <!-- Questions -->
                 <div class="col-lg-8">
                     {% for question in questions %}
-                    <div class="card border-0 shadow-sm mb-2" style="border-radius: 12px;">
-                        <div class="card-body p-3">
+                    <div class="q-card mb-2">
+                        <div class="q-card-body">
                             <div class="d-flex align-items-start gap-2 mb-2">
-                                <div class="question-num flex-shrink-0"
-                                    style="width: 32px; height: 32px; background: linear-gradient(135deg, #667eea, #764ba2); border-radius: 50%; display: flex; align-items: center; justify-content: center; color: white; font-weight: bold; font-size: 0.82rem;">
-                                    {{ forloop.counter }}
-                                </div>
-                                <p class="fw-semibold mb-0" style="font-size: 0.97rem; line-height: 1.4;">{{ question.question }}</p>
+                                <div class="q-num flex-shrink-0">{{ forloop.counter }}</div>
+                                <p class="fw-semibold mb-0 q-text">{{ question.question }}</p>
                             </div>
-
-                            <div class="ps-5">
+                            <div class="ps-4">
                                 {% for answer in question.answers.all %}
-                                <label class="answer-label d-flex align-items-center gap-2 px-3 py-2 mb-1 rounded-3 cursor-pointer"
-                                    style="border: 1.5px solid #e9ecef; transition: all 0.2s; cursor: pointer;"
+                                <label class="answer-label"
                                     for="q{{ question.pk }}_a{{ answer.pk }}">
                                     <input type="radio"
                                         name="question_{{ question.pk }}"
                                         id="q{{ question.pk }}_a{{ answer.pk }}"
                                         value="{{ answer.pk }}"
-                                        class="form-check-input m-0"
-                                        style="width: 18px; height: 18px; flex-shrink: 0;"
+                                        class="answer-radio"
                                         required>
-                                    <span style="font-size: 0.92rem;">{{ answer.text }}</span>
+                                    <span class="answer-text">{{ answer.text }}</span>
                                 </label>
                                 {% endfor %}
                             </div>
@@ -66,14 +60,14 @@
                     </div>
                     {% endfor %}
 
-                    <!-- Submit button -->
-                    <div class="d-grid gap-2 d-md-flex mt-4">
-                        <button type="submit" class="btn btn-primary btn-lg px-5 rounded-pill flex-fill"
+                    <!-- Submit -->
+                    <div class="d-flex gap-2 mt-3">
+                        <button type="submit" class="btn btn-primary flex-fill rounded-pill"
                             style="background: linear-gradient(135deg, #667eea, #764ba2); border: none;"
                             id="submitBtn">
                             <i class="bi bi-send-fill me-2"></i>Testni yakunlash
                         </button>
-                        <a href="{% url 'final_test_list' %}" class="btn btn-outline-secondary btn-lg rounded-pill px-4">
+                        <a href="{% url 'final_test_list' %}" class="btn btn-outline-secondary rounded-pill px-4">
                             <i class="bi bi-arrow-left me-2"></i>Orqaga
                         </a>
                     </div>
@@ -81,58 +75,50 @@
 
                 <!-- Sidebar -->
                 <div class="col-lg-4">
-                    <div class="sticky-top" style="top: 80px;">
+                    <div class="sidebar-sticky">
                         <!-- Progress tracker -->
-                        <div class="card border-0 shadow-sm mb-4" style="border-radius: 16px;">
-                            <div class="card-body p-4">
-                                <h6 class="fw-bold mb-3">
-                                    <i class="bi bi-list-check me-2" style="color: #667eea;"></i>
-                                    Savollar holati
-                                </h6>
-                                <div class="d-flex flex-wrap gap-2 mb-3" id="questionTracker">
-                                    {% for question in questions %}
-                                    <a href="#" class="tracker-btn"
-                                        data-qid="{{ question.pk }}"
-                                        style="width: 36px; height: 36px; background: #e9ecef; border-radius: 8px; display: flex; align-items: center; justify-content: center; text-decoration: none; color: #6c757d; font-weight: 600; font-size: 0.85rem; transition: all 0.2s;">
-                                        {{ forloop.counter }}
-                                    </a>
-                                    {% endfor %}
+                        <div class="sidebar-card mb-3">
+                            <h6 class="fw-bold mb-3">
+                                <i class="bi bi-list-check me-2" style="color: #667eea;"></i>
+                                Savollar holati
+                            </h6>
+                            <div class="d-flex flex-wrap gap-1 mb-3" id="questionTracker">
+                                {% for question in questions %}
+                                <a href="#" class="tracker-btn"
+                                    data-qid="{{ question.pk }}">
+                                    {{ forloop.counter }}
+                                </a>
+                                {% endfor %}
+                            </div>
+                            <div class="progress rounded-pill" style="height: 7px;">
+                                <div class="progress-bar" id="progressBar" role="progressbar"
+                                    style="width: 0%; background: linear-gradient(135deg, #667eea, #764ba2);">
                                 </div>
-                                <div class="progress rounded-pill" style="height: 8px;">
-                                    <div class="progress-bar" id="progressBar" role="progressbar"
-                                        style="width: 0%; background: linear-gradient(135deg, #667eea, #764ba2);">
-                                    </div>
-                                </div>
-                                <div class="text-center mt-2 small text-muted">
-                                    <span id="answeredCount">0</span> / {{ questions|length }} javob berildi
-                                </div>
+                            </div>
+                            <div class="text-center mt-2 small text-muted">
+                                <span id="answeredCount">0</span> / {{ questions|length }} javob berildi
                             </div>
                         </div>
 
                         <!-- Info card -->
-                        <div class="card border-0 shadow-sm" style="border-radius: 16px; overflow: hidden;">
-                            <div class="card-header border-0 p-3 text-white"
-                                style="background: linear-gradient(135deg, #11998e, #38ef7d);">
-                                <h6 class="mb-0 fw-bold">
-                                    <i class="bi bi-info-circle me-2"></i>Test haqida
-                                </h6>
+                        <div class="sidebar-card">
+                            <div class="sidebar-info-header">
+                                <i class="bi bi-info-circle me-2"></i>Test haqida
                             </div>
-                            <div class="card-body p-3">
-                                <ul class="list-unstyled mb-0" style="font-size: 0.9rem;">
-                                    <li class="mb-2 d-flex align-items-center gap-2">
-                                        <i class="bi bi-question-circle text-primary"></i>
-                                        <span>{{ questions|length }} ta savol</span>
-                                    </li>
-                                    <li class="mb-2 d-flex align-items-center gap-2">
-                                        <i class="bi bi-bullseye text-success"></i>
-                                        <span>O'tish chegarasi: <strong>{{ test.pass_score }}%</strong></span>
-                                    </li>
-                                    <li class="d-flex align-items-center gap-2">
-                                        <i class="bi bi-exclamation-triangle text-warning"></i>
-                                        <span>Har bir savolga javob bering</span>
-                                    </li>
-                                </ul>
-                            </div>
+                            <ul class="list-unstyled mb-0 mt-3" style="font-size: 0.88rem;">
+                                <li class="mb-2 d-flex align-items-center gap-2">
+                                    <i class="bi bi-question-circle text-primary"></i>
+                                    <span>{{ questions|length }} ta savol</span>
+                                </li>
+                                <li class="mb-2 d-flex align-items-center gap-2">
+                                    <i class="bi bi-bullseye text-success"></i>
+                                    <span>O'tish: <strong>{{ test.pass_score }}%</strong></span>
+                                </li>
+                                <li class="d-flex align-items-center gap-2">
+                                    <i class="bi bi-exclamation-triangle text-warning"></i>
+                                    <span>Har bir savolga javob bering</span>
+                                </li>
+                            </ul>
                         </div>
                     </div>
                 </div>
@@ -155,13 +141,97 @@
 
 {% block extra_css %}
 <style>
+    /* Override global card height:100% for this page */
+    .q-card {
+        background: #fff;
+        border-radius: 10px;
+        box-shadow: 0 2px 8px rgba(0,0,0,0.07);
+        /* NO height:100% override */
+        height: auto !important;
+        transition: none;
+    }
+    .q-card:hover {
+        transform: none;
+        box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+    }
+    .q-card-body {
+        padding: 12px 14px;
+    }
+    .q-num {
+        width: 28px;
+        height: 28px;
+        background: linear-gradient(135deg, #667eea, #764ba2);
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: white;
+        font-weight: bold;
+        font-size: 0.78rem;
+        flex-shrink: 0;
+    }
+    .q-text {
+        font-size: 0.93rem;
+        line-height: 1.4;
+    }
+    .answer-label {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        padding: 7px 12px;
+        margin-bottom: 5px;
+        border: 1.5px solid #e9ecef;
+        border-radius: 8px;
+        cursor: pointer;
+        transition: border-color 0.15s, background 0.15s;
+    }
     .answer-label:hover {
-        border-color: #667eea !important;
+        border-color: #667eea;
         background: #667eea08;
     }
-    .answer-label.selected {
+    .answer-label:has(.answer-radio:checked) {
         border-color: #667eea !important;
         background: #667eea12;
+    }
+    .answer-radio {
+        width: 16px;
+        height: 16px;
+        flex-shrink: 0;
+        accent-color: #667eea;
+    }
+    .answer-text {
+        font-size: 0.88rem;
+    }
+    /* Sidebar */
+    .sidebar-sticky {
+        position: sticky;
+        top: 75px;
+    }
+    .sidebar-card {
+        background: #fff;
+        border-radius: 12px;
+        box-shadow: 0 2px 8px rgba(0,0,0,0.07);
+        padding: 14px 16px;
+        height: auto !important;
+    }
+    .sidebar-info-header {
+        font-weight: 700;
+        font-size: 0.92rem;
+        color: #11998e;
+    }
+    .tracker-btn {
+        width: 30px;
+        height: 30px;
+        background: #e9ecef;
+        border-radius: 6px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        text-decoration: none;
+        color: #6c757d;
+        font-weight: 600;
+        font-size: 0.78rem;
+        transition: all 0.2s;
     }
     .tracker-btn.answered {
         background: linear-gradient(135deg, #667eea, #764ba2) !important;
@@ -175,20 +245,11 @@
     const totalQuestions = {{ questions|length }};
     let answeredQuestions = new Set();
 
-    // Answer selection styling
     document.querySelectorAll('input[type="radio"]').forEach(radio => {
         radio.addEventListener('change', function() {
             const qid = this.name.replace('question_', '');
-            // Remove selected from siblings
-            document.querySelectorAll(`input[name="${this.name}"]`).forEach(r => {
-                r.closest('.answer-label').classList.remove('selected');
-            });
-            // Add selected to current
-            this.closest('.answer-label').classList.add('selected');
-            // Update tracker
             answeredQuestions.add(qid);
             updateProgress();
-            // Update tracker button
             const btn = document.querySelector(`.tracker-btn[data-qid="${qid}"]`);
             if (btn) btn.classList.add('answered');
         });
@@ -200,17 +261,15 @@
         document.getElementById('progressBar').style.width = (count / totalQuestions * 100) + '%';
     }
 
-    // Scroll to question on tracker click
     document.querySelectorAll('.tracker-btn').forEach(btn => {
         btn.addEventListener('click', function(e) {
             e.preventDefault();
             const qid = this.dataset.qid;
-            const questionCard = document.querySelector(`input[name="question_${qid}"]`).closest('.card');
+            const questionCard = document.querySelector(`input[name="question_${qid}"]`).closest('.q-card');
             questionCard.scrollIntoView({ behavior: 'smooth', block: 'center' });
         });
     });
 
-    // Submit validation
     document.getElementById('finalTestForm').addEventListener('submit', function(e) {
         if (answeredQuestions.size < totalQuestions) {
             e.preventDefault();
